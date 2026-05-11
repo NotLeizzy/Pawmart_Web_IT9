@@ -1,93 +1,140 @@
 <x-guest-layout>
-    <!-- Session Status -->
-    @if (session('status'))
-        <div class="mb-4 p-4 bg-green-50 border-l-4 border-green-500 rounded-lg">
-            <p class="text-green-700 text-sm font-medium flex items-center gap-2">
-                <i class="fas fa-check-circle"></i> {{ session('status') }}
-            </p>
-        </div>
-    @endif
+    <div class="container-fluid d-flex justify-content-center align-items-center min-vh-100">
+        <div class="card shadow-lg border-0 rounded-4" style="max-width: 28rem; border: 1px solid #fed7aa !important;">
 
-    @if ($errors->has('email'))
-        <div class="mb-4 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg">
-            <p class="text-red-700 text-sm font-medium flex items-center gap-2">
-                <i class="fas fa-exclamation-circle"></i> {{ $errors->first('email') }}
-            </p>
-        </div>
-    @endif
+            <div class="card-body p-4">
 
-    <div class="mb-6">
-        <h2 class="text-2xl font-bold text-gray-800 text-center mb-2">Welcome Back!</h2>
-        <p class="text-center text-gray-600 text-sm">Sign in to your Pawmart account</p>
-    </div>
+                {{-- Logo --}}
+                <div class="text-center mb-4">
+                    <div class="mx-auto mb-4 d-flex justify-content-center align-items-center rounded-circle shadow-lg" style="width: 2.5rem; height: 2.5rem; background: linear-gradient(135deg, #fb923c, #ec4899);">
+                        <img src="{{ asset('images/PawMartLogo.png') }}"
+                            alt="Pawmart logo"
+                            class="img-fluid p-1" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                    </div>
 
-    <form method="POST" action="{{ route('login') }}" class="space-y-4">
-        @csrf
+                    <h1 class="h3 fw-bold text-dark mb-2">
+                        Pawmart
+                    </h1>
 
-        <!-- Email Address -->
-        <div>
-            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-            <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" 
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100 transition-all duration-300 bg-gray-50 hover:bg-white"
-                placeholder="you@example.com">
-            @if ($errors->has('email'))
-                <p class="mt-1 text-sm text-red-600 flex items-center gap-1">
-                    <i class="fas fa-exclamation-circle"></i> {{ $errors->first('email') }}
-                </p>
-            @endif
-        </div>
+                    <p class="text-muted small">
+                        Your Trusted Pet Shop
+                    </p>
+                </div>
 
-        <!-- Password -->
-        <div>
-            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input id="password" type="password" name="password" required autocomplete="current-password" 
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-100 transition-all duration-300 bg-gray-50 hover:bg-white"
-                placeholder="••••••••">
-            @if ($errors->has('password'))
-                <p class="mt-1 text-sm text-red-600 flex items-center gap-1">
-                    <i class="fas fa-exclamation-circle"></i> {{ $errors->first('password') }}
-                </p>
-            @endif
-        </div>
+                {{-- Session Status --}}
+                @if (session('status'))
+                    <div class="alert alert-success border-0 rounded-3 mb-4" role="alert">
+                        <small class="fw-medium">
+                            {{ session('status') }}
+                        </small>
+                    </div>
+                @endif
 
-        <!-- Remember Me -->
-        <label class="flex items-center gap-2 text-sm">
-            <input id="remember_me" type="checkbox" name="remember" class="rounded border-gray-300 text-orange-500 focus:ring-orange-400 cursor-pointer">
-            <span class="text-gray-700">Remember me on this device</span>
-        </label>
+                {{-- Title --}}
+                <div class="mb-4">
+                    <h2 class="h4 fw-bold text-dark mb-1">
+                        Welcome Back! 🐾
+                    </h2>
 
-        <!-- Forgot Password & Login -->
-        <div class="flex items-center justify-between pt-2">
-            @if (Route::has('password.request'))
-                <a href="{{ route('password.request') }}" class="text-sm text-orange-500 hover:text-orange-600 font-semibold hover:underline flex items-center gap-1">
-                    <i class="fas fa-key"></i> Forgot password?
-                </a>
-            @else
-                <div></div>
-            @endif
+                    <p class="text-muted small">
+                        Sign in to your Pawmart account
+                    </p>
+                </div>
 
-            <button type="submit" class="px-6 py-3 bg-orange-500 text-white font-semibold rounded-xl hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-200 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2">
-                <i class="fas fa-sign-in-alt"></i> Log In
-            </button>
-        </div>
+                {{-- Form --}}
+                <form method="POST" action="{{ route('login') }}" class="mb-4">
+                    @csrf
 
-        <!-- Divider -->
-        <div class="relative pt-4">
-            <div class="absolute inset-0 flex items-center">
-                <div class="w-full border-t-2 border-gray-200"></div>
+                    {{-- Email --}}
+                    <div class="mb-3">
+                        <label class="form-label fw-medium text-dark small mb-2">
+                            Email Address
+                        </label>
+
+                        <input type="email"
+                            name="email"
+                            value="{{ old('email') }}"
+                            required
+                            autofocus
+                            class="form-control border rounded-3 bg-light px-3 py-2"
+                            style="border-color: #e5e7eb !important;"
+                            placeholder="you@example.com">
+
+                        @error('email')
+                            <div class="text-danger small mt-2">
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+
+                    {{-- Password --}}
+                    <div class="mb-3">
+                        <label class="form-label fw-medium text-dark small mb-2">
+                            Password
+                        </label>
+
+                        <input type="password"
+                            name="password"
+                            required
+                            class="form-control border rounded-3 bg-light px-3 py-2"
+                            style="border-color: #e5e7eb !important;"
+                            placeholder="••••••••">
+
+                        @error('password')
+                            <div class="text-danger small mt-2">
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+
+                    {{-- Remember Me --}}
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="form-check">
+                            <input type="checkbox"
+                                name="remember"
+                                class="form-check-input"
+                                id="remember">
+
+                            <label class="form-check-label text-muted small" for="remember">
+                                Remember me
+                            </label>
+                        </div>
+
+                        @if (Route::has('password.request'))
+                            <a href="{{ route('password.request') }}"
+                                class="text-decoration-none small fw-medium"
+                                style="color: #fb923c;">
+                                Forgot password?
+                            </a>
+                        @endif
+                    </div>
+
+                    {{-- Button --}}
+                    <button type="submit"
+                        class="btn w-100 rounded-3 py-2 fw-semibold shadow-lg text-white border-0"
+                        style="background: linear-gradient(90deg, #fb923c, #ec4899);">
+                        Log In
+                    </button>
+                </form>
+
+                {{-- Register --}}
+                <div class="text-center text-muted small">
+                    New to Pawmart?
+
+                    <a href="{{ route('register') }}"
+                        class="text-decoration-none fw-semibold ms-1"
+                        style="color: #fb923c;">
+                        Create an Account
+                    </a>
+                </div>
+
             </div>
-            <div class="relative flex justify-center text-sm">
-                <span class="px-2 bg-white text-gray-500">New to Pawmart?</span>
-            </div>
         </div>
 
-        <!-- Register Link -->
-        <a href="{{ route('register') }}" class="w-full block text-center px-4 py-3 mt-4 border-2 border-orange-400 text-orange-500 font-semibold rounded-xl hover:bg-orange-50 focus:outline-none focus:ring-4 focus:ring-orange-200 transition-all duration-300 hover:border-orange-500">
-            <i class="fas fa-user-plus"></i> Create an Account
-        </a>
-    </form>
+        {{-- Footer --}}
+        <p class="text-center text-muted mt-4" style="font-size: 0.75rem;">
+            🐾 Securely login to manage your pets and orders
+        </p>
 
-    <div class="mt-6 pt-6 border-t-2 border-gray-100 text-center">
-        <p class="text-xs text-gray-500">🐾 Securely login to manage your pets and orders</p>
     </div>
 </x-guest-layout>
