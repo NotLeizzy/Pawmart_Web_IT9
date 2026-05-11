@@ -75,10 +75,7 @@ class ProductController extends Controller
             }
         }
 
-        return response()->json([
-            'message' => 'Product created successfully',
-            'data' => $product->load(['category', 'images'])
-        ], 201);
+        return redirect()->route('admin.products.index')->with('success', 'Product created successfully!');
     }
 
     public function show($id)

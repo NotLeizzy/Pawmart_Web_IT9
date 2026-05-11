@@ -46,7 +46,28 @@ class PetController extends Controller
 
     public function store(Request $request)
     {
-        return Pet::create($request->all());
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'species' => 'required|string|max:255',
+            'breed' => 'nullable|string|max:255',
+            'age' => 'required|integer|min:0',
+            'price' => 'required|numeric|min:0',
+            'description' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'status' => 'required|in:available,sold,pending',
+        ]);
+
+        $data = $request->all();
+
+        if ($request->hasFile('image')) {
+            $imageName = time() . '.' . $request->image->extension();
+            $request->image->move(public_path('images/pets'), $imageName);
+            $data['image'] = 'images/pets/' . $imageName;
+        }
+
+        Pet::create($data);
+
+        return redirect()->route('admin.pets.index')->with('success', 'Pet added successfully!');
     }
 
     public function show($id)

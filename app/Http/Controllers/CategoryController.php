@@ -52,7 +52,7 @@ class CategoryController extends Controller
 
         $category = Category::create($validated);
 
-        return response()->json($category, 201);
+        return redirect()->route('admin.categories.index')->with('success', 'Category created successfully!');
     }
 
     public function show($id)
