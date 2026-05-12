@@ -62,7 +62,16 @@
                             <tr>
                                 <td><strong>#{{ $pet->id }}</strong></td>
                                 <td>
-                                    <i class="fas fa-paw"></i> {{ $pet->name }}
+                                    <div class="d-flex align-items-center">
+                                        @if($pet->image)
+                                            <img src="{{ asset($pet->image) }}" class="rounded me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                        @else
+                                            <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                <i class="fas fa-paw text-muted"></i>
+                                            </div>
+                                        @endif
+                                        {{ $pet->name }}
+                                    </div>
                                 </td>
                                 <td>{{ $pet->breed ?? 'N/A' }}</td>
                                 <td>{{ 'N/A' }}</td>

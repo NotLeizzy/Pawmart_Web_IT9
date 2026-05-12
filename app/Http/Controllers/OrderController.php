@@ -34,7 +34,17 @@ class OrderController extends Controller
 
     public function create()
     {
-        abort(404);
+        $cart = session()->get('cart', []);
+        
+        if (empty($cart)) {
+            return redirect()->route('products.index')->with('error', 'Your cart is empty. Please add items before checking out.');
+        }
+
+        $total = array_reduce($cart, function ($sum, $item) {
+            return $sum + ($item['price'] * $item['quantity']);
+        }, 0);
+
+        return view('orders.create', compact('cart', 'total'));
     }
 
     public function edit($id)
@@ -44,50 +54,53 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'delivery_address' => 'required|string|max:255',
+        ]);
+
+        $cart = session()->get('cart', []);
+
+        if (empty($cart)) {
+            return redirect()->route('products.index')->with('error', 'Your cart is empty.');
+        }
+
+        $total = array_reduce($cart, function ($sum, $item) {
+            return $sum + ($item['price'] * $item['quantity']);
+        }, 0);
+
+        // Create the Order
         $order = Order::create([
-            'user_id' => $request->user_id,
-            'total_amount' => 0,
-            'status' => $request->status ?? 'pending',
+            'user_id' => Auth::id(),
+            'total_amount' => $total,
+            'status' => 'pending',
             'delivery_address' => $request->delivery_address
         ]);
 
-        $total = 0;
-
-        if ($request->products) {
-            foreach ($request->products as $item) {
+        // Create Order Items from Cart
+        foreach ($cart as $item) {
+            if (isset($item['type']) && $item['type'] === 'pet') {
+                PetOrder::create([
+                    'order_id' => $order->id,
+                    'pet_id' => $item['pet_id'],
+                    'price' => $item['price']
+                ]);
+                
+                Pet::where('id', $item['pet_id'])->update(['status' => 'sold']);
+            } else {
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item['product_id'],
                     'quantity' => $item['quantity'],
                     'price' => $item['price']
                 ]);
-
-                $total += $item['price'] * $item['quantity'];
             }
         }
 
-        if ($request->pets) {
-            foreach ($request->pets as $petData) {
-                PetOrder::create([
-                    'order_id' => $order->id,
-                    'pet_id' => $petData['pet_id'],
-                    'price' => $petData['price']
-                ]);
+        // Clear the cart
+        session()->forget('cart');
 
-                Pet::where('id', $petData['pet_id'])
-                    ->update(['status' => 'sold']);
-
-                $total += $petData['price'];
-            }
-        }
-
-        if ($request->status === 'completed') {
-            $this->applyStockOutForOrder($order);
-        }
-
-        $order->update(['total_amount' => $total]);
-
-        return $order->load(['items.product', 'petOrders.pet']);
+        // Redirect to Payment Page
+        return redirect()->route('payments.create', ['order' => $order->id])->with('success', 'Order created! Please complete your payment.');
     }
 
     public function show($id)
@@ -106,41 +119,9 @@ class OrderController extends Controller
     public function update(Request $request, $id)
     {
         $order = Order::findOrFail($id);
-
-        $previousStatus = $order->status;
         $order->update($request->all());
 
-        if ($request->status === 'completed' && $previousStatus !== 'completed') {
-            $this->applyStockOutForOrder($order);
-        }
-
         return $order;
-    }
-
-    private function applyStockOutForOrder(Order $order): void
-    {
-        DB::transaction(function () use ($order) {
-            $order->load('items.product');
-
-            foreach ($order->items as $item) {
-                $product = $item->product;
-
-                if (! $product || $product->stock < $item->quantity) {
-                    continue;
-                }
-
-                $product->decrement('stock', $item->quantity);
-
-                StockMovement::create([
-                    'product_id' => $product->id,
-                    'order_id' => $order->id,
-                    'type' => 'out',
-                    'quantity' => $item->quantity,
-                    'reference' => 'sale',
-                    'user_id' => Auth::id(),
-                ]);
-            }
-        });
     }
 
     public function destroy($id)

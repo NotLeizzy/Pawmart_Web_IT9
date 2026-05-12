@@ -91,6 +91,18 @@
                         @enderror
                     </div>
 
+                    <!-- Images -->
+                    <div class="mb-4">
+                        <label for="images" class="form-label">
+                            <i class="fas fa-images"></i> Product Images
+                        </label>
+                        <input class="form-control @error('images.*') is-invalid @enderror" type="file" id="images" name="images[]" multiple accept="image/*">
+                        <small class="text-muted">You can select multiple images. Leave empty if you do not wish to update images.</small>
+                        @error('images.*')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+
                     <!-- Form Actions -->
                     <div class="row">
                         <div class="col-12">

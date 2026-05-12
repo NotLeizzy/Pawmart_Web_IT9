@@ -70,10 +70,10 @@
                                 <td>{{ $order->user->name ?? 'N/A' }}</td>
                                 <td>
                                     <span class="badge bg-light text-dark">
-                                        {{ $order->items_count ?? 0 }} items
+                                        {{ $order->items->sum('quantity') ?? 0 }} items
                                     </span>
                                 </td>
-                                <td><strong>₱{{ number_format($order->total ?? 0, 2) }}</strong></td>
+                                <td><strong>₱{{ number_format($order->total_amount ?? 0, 2) }}</strong></td>
                                 <td>
                                     <span class="badge" style="background-color: #ff9f43;">
                                         {{ ucfirst($order->status ?? 'pending') }}

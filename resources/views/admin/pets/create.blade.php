@@ -15,7 +15,7 @@
             </div>
 
             <div class="card-body">
-                <form action="{{ isset($pet) ? route('admin.pets.update', $pet->id) : route('admin.pets.store') }}" method="POST">
+                <form action="{{ isset($pet) ? route('admin.pets.update', $pet->id) : route('admin.pets.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
                     @if(isset($pet))
@@ -59,6 +59,15 @@
                                 class="form-control @error('age') is-invalid @enderror"
                                 value="{{ old('age', $pet->age ?? '') }}">
                             @error('age')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-12">
+                            <label for="image" class="form-label">Pet Image</label>
+                            <input type="file" id="image" name="image" accept="image/*"
+                                class="form-control @error('image') is-invalid @enderror">
+                            @error('image')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>

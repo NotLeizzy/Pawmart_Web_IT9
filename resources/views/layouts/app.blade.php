@@ -225,10 +225,20 @@
                             <i class="fas fa-shopping-bag"></i> My Orders
                         </a>
                     </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link @if(request()->routeIs('cart.index')) active @endif" href="{{ route('cart.index') }}">
+                            <i class="fas fa-shopping-cart"></i> Cart
+                            @if(session('cart') && count(session('cart')) > 0)
+                                <span class="badge bg-danger rounded-pill">{{ count(session('cart')) }}</span>
+                            @endif
+                        </a>
+                    </li>
                 </ul>
 
                 <!-- User Dropdown -->
                 <ul class="navbar-nav ms-auto">
+
                     <li class="nav-item user-dropdown">
                         <a class="nav-link user-dropdown-toggle" href="javascript:void(0);" id="userDropdownToggle">
                             <i class="fas fa-user-circle"></i>
