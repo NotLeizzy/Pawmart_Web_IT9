@@ -172,7 +172,7 @@
                                     </td>
                                     <td>{{ $order->created_at->format('M d, Y') ?? 'N/A' }}</td>
                                     <td>
-                                        <a href="{{ route('orders.show', $order->id) }}" class="btn btn-sm btn-outline-primary">
+                                        <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-sm btn-outline-primary">
                                             View
                                         </a>
                                     </td>

@@ -65,35 +65,54 @@
                     </thead>
                     <tbody>
                         @forelse($orders as $order)
-                            <tr>
-                                <td><strong>#{{ $order->id }}</strong></td>
-                                <td>{{ $order->user->name ?? 'N/A' }}</td>
-                                <td>
-                                    <span class="badge bg-light text-dark">
-                                        {{ $order->items->sum('quantity') ?? 0 }} items
-                                    </span>
-                                </td>
-                                <td><strong>₱{{ number_format($order->total_amount ?? 0, 2) }}</strong></td>
-                                <td>
-                                    <span class="badge" style="background-color: #ff9f43;">
-                                        {{ ucfirst($order->status ?? 'pending') }}
-                                    </span>
-                                </td>
-                                <td>{{ $order->created_at->format('M d, Y H:i') ?? 'N/A' }}</td>
-                                <td>
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-outline-info" title="View Details">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
+                        <tr>
+                            <td><strong>#{{ $order->id }}</strong></td>
+                            <td>{{ $order->user->name ?? 'N/A' }}</td>
+                            <td>
+                                <span class="badge bg-light text-dark">
+                                    {{ $order->items->sum('quantity') ?? 0 }} items
+                                </span>
+                            </td>
+                            <td><strong>₱{{ number_format($order->total_amount ?? 0, 2) }}</strong></td>
+                            <td>
+
+                                @if($order->status == 'pending')
+                                <span class="badge bg-warning text-dark">
+                                    Pending
+                                </span>
+                                @elseif($order->status == 'processing')
+                                <span class="badge bg-primary">
+                                    Processing
+                                </span>
+                                @elseif($order->status == 'completed')
+                                <span class="badge bg-success">
+                                    Completed
+                                </span>
+                                @elseif($order->status == 'cancelled')
+                                <span class="badge bg-danger">
+                                    Cancelled
+                                </span>
+                                @else
+                                <span class="badge bg-secondary">
+                                    {{ ucfirst($order->status ?? 'Unknown') }}
+                                </span>
+                                @endif
+                            </td>
+                            <td>{{ $order->created_at->format('M d, Y H:i') ?? 'N/A' }}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-outline-info" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
                         @empty
-                            <tr>
-                                <td colspan="7" class="text-center text-muted py-4">
-                                    <i class="fas fa-inbox"></i> No orders found
-                                </td>
-                            </tr>
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">
+                                <i class="fas fa-inbox"></i> No orders found
+                            </td>
+                        </tr>
                         @endforelse
                     </tbody>
                 </table>

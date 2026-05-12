@@ -34,12 +34,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Customer Dashboard
     Route::get('/dashboard', function () {
         $userId = \Illuminate\Support\Facades\Auth::id();
-        
+
         $myOrdersCount = \App\Models\Order::where('user_id', $userId)->count();
-        $myPetOrdersCount = \App\Models\PetOrder::whereHas('order', function($query) use ($userId) {
+        $myPetOrdersCount = \App\Models\PetOrder::whereHas('order', function ($query) use ($userId) {
             $query->where('user_id', $userId);
         })->count();
-        
+
         // Count of successfully adopted pets is same as pet orders
         $myPetsCount = $myPetOrdersCount;
 
@@ -48,8 +48,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $availablePets = \App\Models\Pet::where('status', 'available')->latest()->take(4)->get();
 
         return view('dashboard', compact(
-            'myOrdersCount', 'myPetOrdersCount', 'myPetsCount',
-            'recentOrders', 'featuredProducts', 'availablePets'
+            'myOrdersCount',
+            'myPetOrdersCount',
+            'myPetsCount',
+            'recentOrders',
+            'featuredProducts',
+            'availablePets'
         ));
     })->name('dashboard');
 
@@ -139,8 +143,14 @@ Route::middleware(['auth', 'verified', 'admin'])
             $recentOrders = \App\Models\Order::with('user')->latest()->take(5)->get();
 
             return view('admin.dashboard', compact(
-                'totalProducts', 'totalOrders', 'totalPets', 'lowStockItems',
-                'totalCategories', 'totalPayments', 'totalPetOrders', 'recentOrders'
+                'totalProducts',
+                'totalOrders',
+                'totalPets',
+                'lowStockItems',
+                'totalCategories',
+                'totalPayments',
+                'totalPetOrders',
+                'recentOrders'
             ));
         })->name('dashboard');
 
@@ -181,6 +191,14 @@ Route::middleware(['auth', 'verified', 'admin'])
         |--------------------------------------------------------------------------
         */
         Route::resource('orders', OrderController::class);
+        Route::put('/admin/orders/{id}', [OrderController::class, 'update'])
+            ->name('admin.orders.update');
+
+        Route::put('/orders/{id}/cancel', [OrderController::class, 'cancelOrder'])
+            ->name('orders.cancel');
+
+        Route::put('/orders/{id}/confirm', [OrderController::class, 'confirmReceived'])
+            ->name('orders.confirm');
 
         /*
         |--------------------------------------------------------------------------
@@ -210,4 +228,4 @@ Route::middleware(['auth', 'verified', 'admin'])
 |--------------------------------------------------------------------------
 */
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

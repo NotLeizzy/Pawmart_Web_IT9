@@ -59,50 +59,63 @@
                     </thead>
                     <tbody>
                         @forelse($pets as $pet)
-                            <tr>
-                                <td><strong>#{{ $pet->id }}</strong></td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        @if($pet->image)
-                                            <img src="{{ asset($pet->image) }}" class="rounded me-2" style="width: 40px; height: 40px; object-fit: cover;">
-                                        @else
-                                            <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                                <i class="fas fa-paw text-muted"></i>
-                                            </div>
-                                        @endif
-                                        {{ $pet->name }}
+                        <tr>
+                            <td><strong>#{{ $pet->id }}</strong></td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    @if($pet->image)
+                                    <img src="{{ asset($pet->image) }}" class="rounded me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                    @else
+                                    <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                        <i class="fas fa-paw text-muted"></i>
                                     </div>
-                                </td>
-                                <td>{{ $pet->breed ?? 'N/A' }}</td>
-                                <td>{{ 'N/A' }}</td>
-                                <td>{{ $pet->age ?? 'N/A' }} years</td>
-                                <td>
-                                    <span class="badge bg-success">Active</span>
-                                </td>
-                                <td>
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <a href="{{ route('admin.pets.show', $pet->id) }}" class="btn btn-outline-info" title="View">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{{ route('admin.pets.edit', $pet->id) }}" class="btn btn-outline-warning" title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <form action="{{ route('admin.pets.destroy', $pet->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-outline-danger" title="Delete">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
+                                    @endif
+                                    {{ $pet->name }}
+                                </div>
+                            </td>
+                            <td>{{ $pet->breed ?? 'N/A' }}</td>
+                            <td>{{ 'N/A' }}</td>
+                            <td>{{ $pet->age ?? 'N/A' }} years</td>
+                            <td>
+                                @if($pet->status == 'available')
+                                <span class="badge bg-success">
+                                    Available
+                                </span>
+                                @elseif($pet->status == 'sold')
+                                <span class="badge bg-danger">
+                                    Sold
+                                </span>
+                                @elseif($pet->status == 'pending')
+                                <span class="badge bg-warning text-dark">
+                                    Pending
+                                </span>
+                                @else
+                                <span class="badge bg-secondary">
+                                    Unknown
+                                </span>
+                                @endif
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{{ route('admin.pets.edit', $pet->id) }}" class="btn btn-outline-warning" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="{{ route('admin.pets.destroy', $pet->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-outline-danger" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
                         @empty
-                            <tr>
-                                <td colspan="7" class="text-center text-muted py-4">
-                                    <i class="fas fa-inbox"></i> No pets found
-                                </td>
-                            </tr>
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">
+                                <i class="fas fa-inbox"></i> No pets found
+                            </td>
+                        </tr>
                         @endforelse
                     </tbody>
                 </table>

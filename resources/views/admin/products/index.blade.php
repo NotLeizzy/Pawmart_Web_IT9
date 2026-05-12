@@ -91,9 +91,6 @@
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm" role="group">
-                                        <a href="{{ route('admin.products.show', $product->id) }}" class="btn btn-outline-info" title="View">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
                                         <a href="{{ route('admin.products.edit', $product->id) }}" class="btn btn-outline-warning" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
