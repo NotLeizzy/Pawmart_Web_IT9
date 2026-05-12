@@ -33,7 +33,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Customer Dashboard
     Route::get('/dashboard', function () {
-        return view('dashboard');
+        $userId = \Illuminate\Support\Facades\Auth::id();
+        
+        $myOrdersCount = \App\Models\Order::where('user_id', $userId)->count();
+        $myPetOrdersCount = \App\Models\PetOrder::whereHas('order', function($query) use ($userId) {
+            $query->where('user_id', $userId);
+        })->count();
+        
+        // Count of successfully adopted pets is same as pet orders
+        $myPetsCount = $myPetOrdersCount;
+
+        $recentOrders = \App\Models\Order::where('user_id', $userId)->latest()->take(5)->get();
+        $featuredProducts = \App\Models\Product::with('images')->where('stock', '>', 0)->latest()->take(4)->get();
+        $availablePets = \App\Models\Pet::where('status', 'available')->latest()->take(4)->get();
+
+        return view('dashboard', compact(
+            'myOrdersCount', 'myPetOrdersCount', 'myPetsCount',
+            'recentOrders', 'featuredProducts', 'availablePets'
+        ));
     })->name('dashboard');
 
     /*
