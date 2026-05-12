@@ -14,8 +14,9 @@ class StockMovementController extends Controller
         $movements = StockMovement::with(['product', 'user'])->latest()->paginate(20);
         $totalStockIn = StockMovement::where('type', 'in')->sum('quantity');
         $totalStockOut = StockMovement::where('type', 'out')->sum('quantity');
+        $products = Product::orderBy('name')->get();
         
-        return view('admin.stock-movements.index', compact('movements', 'totalStockIn', 'totalStockOut'));
+        return view('admin.stock-movements.index', compact('movements', 'totalStockIn', 'totalStockOut', 'products'));
     }
 
     // ➕ Add stock (IN)
@@ -36,14 +37,11 @@ class StockMovementController extends Controller
             'product_id' => $product->id,
             'type' => 'in',
             'quantity' => $request->quantity,
-            'reason' => $request->reason ?? 'Stock In',
+            'reason' => $request->notes ?? 'Manual Stock In',
             'user_id' => auth()->id(),
         ]);
 
-        return response()->json([
-            'message' => 'Stock added successfully',
-            'data' => $movement
-        ]);
+        return redirect()->back()->with('success', 'Stock added successfully!');
     }
 
     // ➖ Deduct stock (OUT)
@@ -58,9 +56,7 @@ class StockMovementController extends Controller
 
         // Prevent negative stock
         if ($product->stock < $request->quantity) {
-            return response()->json([
-                'message' => 'Not enough stock available'
-            ], 400);
+            return redirect()->back()->with('error', 'Not enough stock available!');
         }
 
         // Update product stock
@@ -71,14 +67,11 @@ class StockMovementController extends Controller
             'product_id' => $product->id,
             'type' => 'out',
             'quantity' => $request->quantity,
-            'reason' => $request->reason ?? 'Stock Out',
+            'reason' => $request->notes ?? 'Manual Stock Out',
             'user_id' => auth()->id(),
         ]);
 
-        return response()->json([
-            'message' => 'Stock deducted successfully',
-            'data' => $movement
-        ]);
+        return redirect()->back()->with('success', 'Stock deducted successfully!');
     }
 
     // 🔍 View single movement

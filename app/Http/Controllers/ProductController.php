@@ -60,13 +60,23 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
+            'price' => 'required|numeric|min:0|max:99999999',
+            'stock' => 'required|integer|min:0|max:99999999',
             'category_id' => 'required|exists:categories,id',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:4096',
         ]);
 
         $product = Product::create($validated);
+
+        if ($product->stock > 0) {
+            \App\Models\StockMovement::create([
+                'product_id' => $product->id,
+                'type' => 'in',
+                'quantity' => $product->stock,
+                'reason' => 'initial_stock',
+                'user_id' => \Illuminate\Support\Facades\Auth::id(),
+            ]);
+        }
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
@@ -90,8 +100,8 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
+            'price' => 'required|numeric|min:0|max:99999999',
+            'stock' => 'required|integer|min:0|max:99999999',
             'category_id' => 'required|exists:categories,id',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:4096',
         ]);
@@ -124,24 +134,26 @@ class ProductController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        $product = Product::with('images')->findOrFail($validated['product_id']);
+        $product = Product::findOrFail($validated['product_id']);
 
-        if ($product->stock < $validated['quantity']) {
+        if ($validated['quantity'] > $product->stock) {
             return response()->json([
                 'message' => 'Quantity exceeds available stock.'
             ], 422);
         }
 
         $cart = session()->get('cart', []);
+        $cartKey = 'product_' . $product->id;
 
-        if (isset($cart[$product->id])) {
-            $cart[$product->id]['quantity'] += $validated['quantity'];
+        if (isset($cart[$cartKey])) {
+            $cart[$cartKey]['quantity'] += $validated['quantity'];
 
-            if ($cart[$product->id]['quantity'] > $product->stock) {
-                $cart[$product->id]['quantity'] = $product->stock;
+            if ($cart[$cartKey]['quantity'] > $product->stock) {
+                $cart[$cartKey]['quantity'] = $product->stock;
             }
         } else {
-            $cart[$product->id] = [
+            $cart[$cartKey] = [
+                'type' => 'product',
                 'product_id' => $product->id,
                 'name' => $product->name,
                 'price' => $product->price,
@@ -154,8 +166,8 @@ class ProductController extends Controller
         session()->put('cart', $cart);
 
         return response()->json([
-            'message' => 'Product added to cart successfully.',
-            'cart_count' => array_sum(array_column($cart, 'quantity')),
+            'message' => 'Product added to cart!',
+            'cart_count' => array_sum(array_column($cart, 'quantity'))
         ]);
     }
 }

@@ -225,10 +225,32 @@
                             <i class="fas fa-shopping-bag"></i> My Orders
                         </a>
                     </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link @if(request()->routeIs('cart.index')) active @endif" href="{{ route('cart.index') }}">
+                            <i class="fas fa-shopping-cart"></i> Cart
+                            @if(session('cart') && count(session('cart')) > 0)
+                                <span class="badge bg-danger rounded-pill">{{ count(session('cart')) }}</span>
+                            @endif
+                        </a>
+                    </li>
                 </ul>
 
                 <!-- User Dropdown -->
                 <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link @if(request()->routeIs('cart.index')) active @endif" href="{{ route('cart.index') }}" title="Shopping Cart">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="d-none d-lg-inline ms-2">Cart</span>
+                            @php
+                                $cartCount = array_sum(array_column(session()->get('cart', []), 'quantity'));
+                            @endphp
+                            @if($cartCount > 0)
+                                <span class="badge bg-danger position-absolute top-0 start-100 translate-middle" style="font-size: 10px; padding: 2px 6px;">{{ $cartCount }}</span>
+                            @endif
+                        </a>
+                    </li>
+
                     <li class="nav-item user-dropdown">
                         <a class="nav-link user-dropdown-toggle" href="javascript:void(0);" id="userDropdownToggle">
                             <i class="fas fa-user-circle"></i>

@@ -12,7 +12,7 @@ class StockMovement extends Model
         'order_id',
         'type', // in or out
         'quantity',
-        'reference',
+        'reason',
         'user_id'
     ];
 

@@ -11,6 +11,7 @@ use App\Http\Controllers\OrderItemController;
 use App\Http\Controllers\PetOrderController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\StockMovementController;
+use App\Http\Controllers\CartController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,9 +46,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
+    | CART
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::delete('/cart/{productId}', [CartController::class, 'destroy'])->name('cart.destroy');
+    Route::patch('/cart/{productId}/update-quantity', [CartController::class, 'updateQuantity'])->name('cart.updateQuantity');
+    Route::post('/products/add-to-cart', [ProductController::class, 'addToCart'])->name('products.addToCart');
+
+    /*
+    |--------------------------------------------------------------------------
     | PETS
     |--------------------------------------------------------------------------
     */
+    Route::post('/pets/add-to-cart', [PetController::class, 'addToCart'])->name('pets.addToCart');
     Route::resource('pets', PetController::class);
 
     /*
@@ -63,7 +75,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::resource('order-items', OrderItemController::class);
-    Route::post('/products/add-to-cart', [ProductController::class, 'addToCart'])->name('products.addToCart');
 
     /*
     |--------------------------------------------------------------------------
@@ -101,7 +112,19 @@ Route::middleware(['auth', 'verified', 'admin'])
 
         // Admin Dashboard
         Route::get('/dashboard', function () {
-            return view('admin.dashboard');
+            $totalProducts = \App\Models\Product::count();
+            $totalOrders = \App\Models\Order::count();
+            $totalPets = \App\Models\Pet::count();
+            $lowStockItems = \App\Models\Product::where('stock', '<', 5)->count();
+            $totalCategories = \App\Models\Category::count();
+            $totalPayments = \App\Models\Payment::count();
+            $totalPetOrders = \App\Models\PetOrder::count();
+            $recentOrders = \App\Models\Order::with('user')->latest()->take(5)->get();
+
+            return view('admin.dashboard', compact(
+                'totalProducts', 'totalOrders', 'totalPets', 'lowStockItems',
+                'totalCategories', 'totalPayments', 'totalPetOrders', 'recentOrders'
+            ));
         })->name('dashboard');
 
         /*
