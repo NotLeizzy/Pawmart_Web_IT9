@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Category;
 use Illuminate\Http\Request;
 
@@ -11,14 +12,14 @@ class CategoryController extends Controller
         // Check if this is an admin request
         if (request()->is('admin/*')) {
             $categories = Category::withCount('products')
-                ->when(request('search'), function($query) {
+                ->when(request('search'), function ($query) {
                     $query->where('name', 'like', '%' . request('search') . '%');
                 })
                 ->paginate(10);
-            
+
             return view('admin.categories.index', compact('categories'));
         }
-        
+
         // API response
         return Category::all();
     }
@@ -52,7 +53,11 @@ class CategoryController extends Controller
 
         $category = Category::create($validated);
 
-        return redirect()->route('admin.categories.index')->with('success', 'Category created successfully!');
+        return response()->json([
+            'id' => $category->id,
+            'name' => $category->name,
+            'message' => 'Category created successfully.'
+        ]);
     }
 
     public function show($id)
