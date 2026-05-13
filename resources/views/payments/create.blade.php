@@ -75,9 +75,29 @@
                             </div>
                         </div>
 
+                        <!-- Dynamic Payment Details (Show for cashless) -->
+                        <div id="cashless_details" style="display: none;">
+                            <div class="card bg-light border-0 mb-4">
+                                <div class="card-body p-4">
+                                    <h6 class="mb-3"><i class="fas fa-info-circle me-2"></i> Payment Details</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label for="reference_number" class="form-label">Reference Number <span class="text-danger">*</span></label>
+                                            <input type="text" id="reference_number" name="reference_number" class="form-control" placeholder="e.g. 123456789">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="account_info" class="form-label">Account Name/Info <span class="text-danger">*</span></label>
+                                            <input type="text" id="account_info" name="account_info" class="form-control" placeholder="Juan Dela Cruz">
+                                        </div>
+                                    </div>
+                                    <div class="form-text mt-2">Please enter the details from your transaction for verification.</div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="d-grid mt-4">
-                            <button type="submit" class="btn btn-primary py-3 fs-5" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%); border: none;">
-                                <i class="fas fa-lock me-2"></i> Pay ₱{{ number_format($order->total_amount, 2) }}
+                            <button type="submit" id="submit_btn" class="btn btn-primary py-3 fs-5" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%); border: none;">
+                                <i class="fas fa-lock me-2"></i> Confirm Payment
                             </button>
                         </div>
                     </form>
@@ -87,6 +107,32 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const radios = document.querySelectorAll('input[name="payment_method"]');
+    const cashlessDetails = document.getElementById('cashless_details');
+    const refInput = document.getElementById('reference_number');
+    const accInput = document.getElementById('account_info');
+    const submitBtn = document.getElementById('submit_btn');
+
+    radios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'Cash on Delivery') {
+                cashlessDetails.style.display = 'none';
+                refInput.required = false;
+                accInput.required = false;
+                submitBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i> Place Order (COD)';
+            } else {
+                cashlessDetails.style.display = 'block';
+                refInput.required = true;
+                accInput.required = true;
+                submitBtn.innerHTML = '<i class="fas fa-lock me-2"></i> Pay ₱{{ number_format($order->total_amount, 2) }} Now';
+            }
+        });
+    });
+});
+</script>
 
 <style>
     .payment-card {

@@ -83,6 +83,7 @@
                             <th>Product</th>
                             <th>Type</th>
                             <th>Quantity</th>
+                            <th>Supplier</th>
                             <th>Notes</th>
                             <th>Date</th>
                         </tr>
@@ -91,7 +92,15 @@
                         @forelse($movements as $movement)
                             <tr>
                                 <td><strong>#{{ $movement->id }}</strong></td>
-                                <td>{{ $movement->product->name ?? 'N/A' }}</td>
+                                <td>
+                                    @if($movement->product)
+                                        {{ $movement->product->name }}
+                                    @else
+                                        <span class="text-muted fst-italic">
+                                            {{ Str::after($movement->reason ?? '', 'Product deleted: ') ?: 'Deleted Product' }}
+                                        </span>
+                                    @endif
+                                </td>
                                 <td>
                                     @if($movement->type == 'in')
                                         <span class="badge bg-success">
@@ -112,12 +121,13 @@
                                         @endif
                                     </strong>
                                 </td>
+                                <td>{{ $movement->supplier ?? '—' }}</td>
                                 <td>{{ $movement->reason ?? 'N/A' }}</td>
                                 <td>{{ $movement->created_at->format('M d, Y H:i') ?? 'N/A' }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted py-4">
+                                <td colspan="7" class="text-center text-muted py-4">
                                     <i class="fas fa-inbox"></i> No stock movements yet
                                 </td>
                             </tr>
@@ -154,6 +164,10 @@
                     <div class="mb-3">
                         <label for="quantity_in" class="form-label">Quantity <span class="text-danger">*</span></label>
                         <input type="number" class="form-control" name="quantity" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="supplier_in" class="form-label">Supplier</label>
+                        <input type="text" class="form-control" id="supplier_in" name="supplier" placeholder="Enter supplier name (optional)">
                     </div>
                     <div class="mb-3">
                         <label for="notes_in" class="form-label">Notes</label>

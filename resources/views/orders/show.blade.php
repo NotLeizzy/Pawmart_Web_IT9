@@ -96,8 +96,13 @@
                 </div>
                 <div class="card-body">
                     <p><strong>Method:</strong> {{ ucfirst($order->payment->payment_method) }}</p>
-                    <p><strong>Status:</strong> <span class="badge badge-{{ $order->payment->payment_status === 'completed' ? 'success' : 'warning' }}">{{ ucfirst($order->payment->payment_status) }}</span></p>
-                    <p><strong>Transaction ID:</strong> {{ $order->payment->transaction_id ?? 'N/A' }}</p>
+                    <p><strong>Status:</strong> <span class="badge {{ $order->payment->status === 'paid' ? 'bg-success' : 'bg-warning text-dark' }}">{{ ucfirst($order->payment->status) }}</span></p>
+                    @if($order->payment->reference_number)
+                        <p><strong>Reference Number:</strong> {{ $order->payment->reference_number }}</p>
+                    @endif
+                    @if($order->payment->account_info)
+                        <p><strong>Account Info:</strong> {{ $order->payment->account_info }}</p>
+                    @endif
                 </div>
             </div>
         @endif

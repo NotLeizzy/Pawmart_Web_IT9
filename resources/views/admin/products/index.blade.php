@@ -64,7 +64,7 @@
                                 <td>
                                     <div class="d-flex align-items-center">
                                         @if($product->images && $product->images->first())
-                                            <img src="{{ asset('storage/' . $product->images->first()->path) }}" class="rounded me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                            <img src="{{ $product->images->first()->path }}" class="rounded me-2" style="width: 40px; height: 40px; object-fit: cover;">
                                         @else
                                             <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
                                                 <i class="fas fa-box text-muted"></i>
@@ -91,9 +91,6 @@
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm" role="group">
-                                        <a href="{{ route('admin.products.show', $product->id) }}" class="btn btn-outline-info" title="View">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
                                         <a href="{{ route('admin.products.edit', $product->id) }}" class="btn btn-outline-warning" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
@@ -208,6 +205,7 @@
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': token,
+                    'Accept': 'application/json',
                 },
                 body: formData,
             });

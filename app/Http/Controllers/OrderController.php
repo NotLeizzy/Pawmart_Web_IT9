@@ -13,17 +13,38 @@ use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        if (request()->is('admin/*')) {
+        // ADMIN VIEW
+        if ($request->is('admin/*')) {
+
             $orders = Order::with(['items.product', 'petOrders.pet', 'payment', 'user'])
+
+                ->when($request->search, function ($query) use ($request) {
+
+                    $search = $request->search;
+
+                    $query->where(function ($q) use ($search) {
+
+                        $q->where('id', $search)
+                            ->orWhereHas('user', function ($userQuery) use ($search) {
+                                $userQuery->where('name', 'LIKE', "%{$search}%");
+                            });
+                    });
+                })
+
+                ->when($request->status, function ($query) use ($request) {
+                    $query->where('status', $request->status);
+                })
+
                 ->latest()
-                ->paginate(10);
+                ->paginate(10)
+                ->withQueryString();
 
             return view('admin.orders.index', compact('orders'));
         }
 
-        // Customer view response
+        // CUSTOMER VIEW
         $orders = Order::where('user_id', Auth::id())
             ->with(['items.product', 'petOrders.pet', 'payment'])
             ->latest()
@@ -35,7 +56,7 @@ class OrderController extends Controller
     public function create()
     {
         $cart = session()->get('cart', []);
-        
+
         if (empty($cart)) {
             return redirect()->route('products.index')->with('error', 'Your cart is empty. Please add items before checking out.');
         }
@@ -84,7 +105,7 @@ class OrderController extends Controller
                     'pet_id' => $item['pet_id'],
                     'price' => $item['price']
                 ]);
-                
+
                 Pet::where('id', $item['pet_id'])->update(['status' => 'sold']);
             } else {
                 OrderItem::create([
@@ -105,7 +126,7 @@ class OrderController extends Controller
 
     public function show($id)
     {
-        $order = Order::with(['items.product', 'petOrders.pet', 'payment'])
+        $order = Order::with(['items.product', 'petOrders.pet', 'payment', 'user'])
             ->findOrFail($id);
 
         // Check if user is admin or the order owner
@@ -113,15 +134,28 @@ class OrderController extends Controller
             abort(403);
         }
 
+        if (request()->is('admin/*')) {
+            return view('admin.orders.show', compact('order'));
+        }
+
         return view('orders.show', compact('order'));
     }
 
     public function update(Request $request, $id)
     {
-        $order = Order::findOrFail($id);
-        $order->update($request->all());
+        $request->validate([
+            'status' => 'required|in:pending,processing,shipped,delivered',
+        ]);
 
-        return $order;
+        $order = Order::findOrFail($id);
+        $order->update(['status' => $request->status]);
+
+        // If the order is delivered, automatically mark the payment as paid
+        if ($request->status === 'delivered' && $order->payment) {
+            $order->payment->update(['status' => 'paid']);
+        }
+
+        return redirect()->route('admin.orders.index')->with('success', "Order #$id status updated to " . ucfirst($request->status) . ".");
     }
 
     public function destroy($id)

@@ -32,41 +32,38 @@
                     </thead>
                     <tbody id="categoryTableBody">
                         @forelse($categories as $category)
-                            <tr>
-                                <td><strong>#{{ $category->id }}</strong></td>
-                                <td>{{ $category->name }}</td>
-                                <td>
-                                    <span class="badge bg-info">
-                                        {{ $category->products_count ?? 0 }} products
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge bg-success">Active</span>
-                                </td>
-                                <td>
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <a href="{{ route('admin.categories.show', $category->id) }}" class="btn btn-outline-info" title="View">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{{ route('admin.categories.edit', $category->id) }}" class="btn btn-outline-warning" title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <form action="{{ route('admin.categories.destroy', $category->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-outline-danger" title="Delete">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
+                        <tr>
+                            <td><strong>#{{ $category->id }}</strong></td>
+                            <td>{{ $category->name }}</td>
+                            <td>
+                                <span class="badge bg-info">
+                                    {{ $category->products_count ?? 0 }} products
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-success">Active</span>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{{ route('admin.categories.edit', $category->id) }}" class="btn btn-outline-warning" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="{{ route('admin.categories.destroy', $category->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-outline-danger" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
                         @empty
-                            <tr>
-                                <td colspan="5" class="text-center text-muted py-4">
-                                    <i class="fas fa-tags"></i> No categories found
-                                </td>
-                            </tr>
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                <i class="fas fa-tags"></i> No categories found
+                            </td>
+                        </tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -124,7 +121,9 @@
         const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         try {
-            const response = await fetch('{{ route("admin.categories.store") }}', {
+            const url = '{{ route("admin.categories.store") }}';
+
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': token,
@@ -132,7 +131,16 @@
                 body: formData,
             });
 
-            const data = await response.json();
+            const contentType = response.headers.get("content-type");
+
+            let data;
+
+            if (contentType && contentType.includes("application/json")) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                throw new Error(text);
+            }
 
             if (!response.ok) {
                 showCategoryAlert('danger', data.message || 'Unable to create category.');
