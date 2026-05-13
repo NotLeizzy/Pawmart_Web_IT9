@@ -15,7 +15,7 @@
     <div class="col-md-3">
         <div class="card border-0 shadow-sm" style="border-left: 4px solid #28a745;">
             <div class="card-body">
-                <h6 class="card-title text-muted">Completed</h6>
+                <h6 class="card-title text-muted">Paid</h6>
                 <h3 style="color: #28a745;">{{ $completedPayments ?? 0 }}</h3>
             </div>
         </div>
@@ -58,7 +58,7 @@
                     <div class="col-md-4">
                         <select name="status" class="form-select">
                             <option value="">All Status</option>
-                            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                            <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>Paid</option>
                             <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                             <option value="failed" {{ request('status') == 'failed' ? 'selected' : '' }}>Failed</option>
                         </select>
@@ -114,8 +114,8 @@
                                     </span>
                                 </td>
                                 <td>
-                                    @if($payment->status == 'completed')
-                                        <span class="badge bg-success">Completed</span>
+                                    @if($payment->status == 'paid')
+                                        <span class="badge bg-success">Paid</span>
                                     @elseif($payment->status == 'pending')
                                         <span class="badge bg-warning text-dark">Pending</span>
                                     @else

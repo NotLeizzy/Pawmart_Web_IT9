@@ -23,7 +23,7 @@
                 {{-- Product Image --}}
                 <div class="position-relative">
                     @if($product->images->first())
-                    <img src="{{ asset('storage/' . $product->images->first()->path) }}"
+                    <img src="{{ $product->images->first()->path }}"
                         class="card-img-top"
                         style="height: 180px; object-fit: cover;">
                     @else
@@ -120,7 +120,6 @@
 
     @push('scripts')
     <script>
-        const storageBase = '{{ asset("storage") }}';
         const cartModal = document.getElementById('cartModal');
         const cartForm = document.getElementById('cartForm');
         const cartProductCarouselInner = document.getElementById('cartProductCarouselInner');
@@ -147,7 +146,7 @@
                         const slide = document.createElement('div');
                         slide.className = `carousel-item ${index === 0 ? 'active' : ''}`;
                         slide.innerHTML = `
-                        <img src="${image.path ? `${storageBase}/${image.path}` : ''}" class="d-block w-100 rounded" style="max-height: 300px; object-fit: cover;" alt="${product.name}">
+                        <img src="${image.path ? image.path : ''}" class="d-block w-100 rounded" style="max-height: 300px; object-fit: cover;" alt="${product.name}">
                     `;
                         cartProductCarouselInner.appendChild(slide);
                     });

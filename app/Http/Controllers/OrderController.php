@@ -143,10 +143,19 @@ class OrderController extends Controller
 
     public function update(Request $request, $id)
     {
-        $order = Order::findOrFail($id);
-        $order->update($request->all());
+        $request->validate([
+            'status' => 'required|in:pending,processing,shipped,delivered',
+        ]);
 
-        return $order;
+        $order = Order::findOrFail($id);
+        $order->update(['status' => $request->status]);
+
+        // If the order is delivered, automatically mark the payment as paid
+        if ($request->status === 'delivered' && $order->payment) {
+            $order->payment->update(['status' => 'paid']);
+        }
+
+        return redirect()->route('admin.orders.index')->with('success', "Order #$id status updated to " . ucfirst($request->status) . ".");
     }
 
     public function destroy($id)

@@ -38,13 +38,24 @@ class PetOrderController extends Controller
 
     public function show($id)
     {
-        return PetOrder::with('pet')->findOrFail($id);
+        $petOrder = PetOrder::with(['pet', 'order.user'])->findOrFail($id);
+
+        if (request()->is('admin/*')) {
+            return view('admin.pet-orders.show', compact('petOrder'));
+        }
+
+        return $petOrder;
     }
 
     public function update(Request $request, $id)
     {
         $petOrder = PetOrder::findOrFail($id);
         $petOrder->update($request->all());
+
+        if (request()->is('admin/*')) {
+            return redirect()->route('admin.pet-orders.index')->with('success', 'Pet order updated successfully.');
+        }
+
         return $petOrder;
     }
 

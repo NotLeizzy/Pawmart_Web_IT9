@@ -121,7 +121,7 @@
         const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         try {
-            const url = @json(route('admin.categories.store'));
+            const url = '{{ route("admin.categories.store") }}';
 
             const response = await fetch(url, {
                 method: 'POST',

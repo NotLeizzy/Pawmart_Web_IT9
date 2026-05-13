@@ -13,7 +13,8 @@ class StockMovement extends Model
         'type', // in or out
         'quantity',
         'reason',
-        'user_id'
+        'supplier',
+        'user_id',
     ];
 
     public function product()

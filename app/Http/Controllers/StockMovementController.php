@@ -24,7 +24,8 @@ class StockMovementController extends Controller
     {
         $request->validate([
             'product_id' => 'required',
-            'quantity' => 'required|integer|min:1',
+            'quantity'   => 'required|integer|min:1',
+            'supplier'   => 'nullable|string|max:255',
         ]);
 
         $product = Product::findOrFail($request->product_id);
@@ -35,10 +36,11 @@ class StockMovementController extends Controller
         // Log movement
         $movement = StockMovement::create([
             'product_id' => $product->id,
-            'type' => 'in',
-            'quantity' => $request->quantity,
-            'reason' => $request->notes ?? 'Manual Stock In',
-            'user_id' => auth()->id(),
+            'type'       => 'in',
+            'quantity'   => $request->quantity,
+            'reason'     => $request->notes ?? 'Manual Stock In',
+            'supplier'   => $request->supplier,
+            'user_id'    => auth()->id(),
         ]);
 
         return redirect()->back()->with('success', 'Stock added successfully!');

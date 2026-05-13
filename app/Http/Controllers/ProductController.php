@@ -80,9 +80,38 @@ class ProductController extends Controller
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-                $path = $image->store('product-images', 'public');
-                $product->images()->create(['path' => $path]);
+                // Check if GD library is available for compression
+                if (function_exists('imagecreatefromstring')) {
+                    $img = @imagecreatefromstring(file_get_contents($image->getRealPath()));
+                    if ($img) {
+                        $width = imagesx($img);
+                        $height = imagesy($img);
+                        $maxDim = 800;
+                        if ($width > $maxDim || $height > $maxDim) {
+                            $ratio = $maxDim / max($width, $height);
+                            $img = imagescale($img, round($width * $ratio), round($height * $ratio));
+                        }
+                        ob_start();
+                        imagejpeg($img, null, 80);
+                        $compressedData = ob_get_clean();
+                        imagedestroy($img);
+                        $base64Image = 'data:image/jpeg;base64,' . base64_encode($compressedData);
+                    } else {
+                        $base64Image = 'data:' . $image->getMimeType() . ';base64,' . base64_encode(file_get_contents($image->getRealPath()));
+                    }
+                } else {
+                    // Fallback to raw Base64 if GD is missing
+                    $base64Image = 'data:' . $image->getMimeType() . ';base64,' . base64_encode(file_get_contents($image->getRealPath()));
+                }
+                $product->images()->create(['path' => $base64Image]);
             }
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Product created successfully!',
+                'data' => $product->load(['category', 'images']),
+            ]);
         }
 
         return redirect()->route('admin.products.index')->with('success', 'Product created successfully!');
@@ -90,7 +119,13 @@ class ProductController extends Controller
 
     public function show($id)
     {
-        return Product::with('category')->findOrFail($id);
+        if (request()->is('admin/*')) {
+            $product = Product::with(['category', 'images'])->findOrFail($id);
+            return redirect()->route('admin.products.index');
+        }
+
+        $product = Product::with(['category', 'images'])->findOrFail($id);
+        return view('products.show', compact('product'));
     }
 
     public function update(Request $request, $id)
@@ -110,21 +145,56 @@ class ProductController extends Controller
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-                $path = $image->store('product-images', 'public');
-                $product->images()->create(['path' => $path]);
+                if (function_exists('imagecreatefromstring')) {
+                    $img = @imagecreatefromstring(file_get_contents($image->getRealPath()));
+                    if ($img) {
+                        $width = imagesx($img);
+                        $height = imagesy($img);
+                        $maxDim = 800;
+                        if ($width > $maxDim || $height > $maxDim) {
+                            $ratio = $maxDim / max($width, $height);
+                            $img = imagescale($img, round($width * $ratio), round($height * $ratio));
+                        }
+                        ob_start();
+                        imagejpeg($img, null, 80);
+                        $compressedData = ob_get_clean();
+                        imagedestroy($img);
+                        $base64Image = 'data:image/jpeg;base64,' . base64_encode($compressedData);
+                    } else {
+                        $base64Image = 'data:' . $image->getMimeType() . ';base64,' . base64_encode(file_get_contents($image->getRealPath()));
+                    }
+                } else {
+                    $base64Image = 'data:' . $image->getMimeType() . ';base64,' . base64_encode(file_get_contents($image->getRealPath()));
+                }
+                $product->images()->create(['path' => $base64Image]);
             }
         }
 
-        return response()->json([
-            'message' => 'Product updated successfully',
-            'data' => $product->load(['category', 'images'])
-        ]);
+        return redirect()->route('admin.products.index')->with('success', 'Product updated successfully!');
     }
 
     public function destroy($id)
     {
-        Product::destroy($id);
-        return response()->json(['message' => 'Deleted']);
+        $product = Product::findOrFail($id);
+
+        // Log a stock-out for any remaining stock before deletion
+        if ($product->stock > 0) {
+            \App\Models\StockMovement::create([
+                'product_id' => $product->id,
+                'type'       => 'out',
+                'quantity'   => $product->stock,
+                'reason'     => 'Product deleted: ' . $product->name,
+                'user_id'    => \Illuminate\Support\Facades\Auth::id(),
+            ]);
+        }
+
+        $product->delete();
+
+        if (request()->wantsJson()) {
+            return response()->json(['message' => 'Product deleted successfully.']);
+        }
+
+        return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully.');
     }
 
     public function addToCart(Request $request)
@@ -158,7 +228,7 @@ class ProductController extends Controller
                 'name' => $product->name,
                 'price' => $product->price,
                 'quantity' => $validated['quantity'],
-                'image' => optional($product->images->first())->path ? asset('storage/' . $product->images->first()->path) : null,
+                'image' => optional($product->images->first())->path,
                 'stock' => $product->stock,
             ];
         }

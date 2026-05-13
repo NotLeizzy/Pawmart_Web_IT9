@@ -50,7 +50,8 @@ class PetController extends Controller
             'name' => 'required|string|max:255',
             'species' => 'required|string|max:255',
             'breed' => 'nullable|string|max:255',
-            'age' => 'required|integer|min:0|max:100',
+            'age' => 'required|integer|min:0',
+            'age_unit' => 'required|in:years,months',
             'price' => 'required|numeric|min:0|max:99999999',
             'description' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -60,9 +61,28 @@ class PetController extends Controller
         $data = $request->all();
 
         if ($request->hasFile('image')) {
-            $imageName = time() . '.' . $request->image->extension();
-            $request->image->move(public_path('images/pets'), $imageName);
-            $data['image'] = 'images/pets/' . $imageName;
+            $image = $request->file('image');
+            if (function_exists('imagecreatefromstring')) {
+                $img = @imagecreatefromstring(file_get_contents($image->getRealPath()));
+                if ($img) {
+                    $width = imagesx($img);
+                    $height = imagesy($img);
+                    $maxDim = 800;
+                    if ($width > $maxDim || $height > $maxDim) {
+                        $ratio = $maxDim / max($width, $height);
+                        $img = imagescale($img, round($width * $ratio), round($height * $ratio));
+                    }
+                    ob_start();
+                    imagejpeg($img, null, 80);
+                    $compressedData = ob_get_clean();
+                    imagedestroy($img);
+                    $data['image'] = 'data:image/jpeg;base64,' . base64_encode($compressedData);
+                } else {
+                    $data['image'] = 'data:' . $image->getMimeType() . ';base64,' . base64_encode(file_get_contents($image->getRealPath()));
+                }
+            } else {
+                $data['image'] = 'data:' . $image->getMimeType() . ';base64,' . base64_encode(file_get_contents($image->getRealPath()));
+            }
         }
 
         Pet::create($data);
@@ -83,7 +103,8 @@ class PetController extends Controller
             'name' => 'required|string|max:255',
             'species' => 'required|string|max:255',
             'breed' => 'nullable|string|max:255',
-            'age' => 'required|integer|min:0|max:100',
+            'age' => 'required|integer|min:0',
+            'age_unit' => 'required|in:years,months',
             'price' => 'required|numeric|min:0|max:99999999',
             'description' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -93,9 +114,28 @@ class PetController extends Controller
         $data = $request->all();
 
         if ($request->hasFile('image')) {
-            $imageName = time() . '.' . $request->image->extension();
-            $request->image->move(public_path('images/pets'), $imageName);
-            $data['image'] = 'images/pets/' . $imageName;
+            $image = $request->file('image');
+            if (function_exists('imagecreatefromstring')) {
+                $img = @imagecreatefromstring(file_get_contents($image->getRealPath()));
+                if ($img) {
+                    $width = imagesx($img);
+                    $height = imagesy($img);
+                    $maxDim = 800;
+                    if ($width > $maxDim || $height > $maxDim) {
+                        $ratio = $maxDim / max($width, $height);
+                        $img = imagescale($img, round($width * $ratio), round($height * $ratio));
+                    }
+                    ob_start();
+                    imagejpeg($img, null, 80);
+                    $compressedData = ob_get_clean();
+                    imagedestroy($img);
+                    $data['image'] = 'data:image/jpeg;base64,' . base64_encode($compressedData);
+                } else {
+                    $data['image'] = 'data:' . $image->getMimeType() . ';base64,' . base64_encode(file_get_contents($image->getRealPath()));
+                }
+            } else {
+                $data['image'] = 'data:' . $image->getMimeType() . ';base64,' . base64_encode(file_get_contents($image->getRealPath()));
+            }
         }
 
         $pet->update($data);
@@ -128,7 +168,7 @@ class PetController extends Controller
                 'name' => $pet->name,
                 'price' => $pet->price,
                 'quantity' => 1,
-                'image' => $pet->image ? asset($pet->image) : null,
+                'image' => $pet->image,
                 'stock' => 1,
             ];
             session()->put('cart', $cart);

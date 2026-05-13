@@ -12,6 +12,13 @@
     </div>
 </div>
 
+@if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-1"></i> {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
 <!-- Filter Section -->
 <div class="row mb-4">
     <div class="col-12">
@@ -24,10 +31,10 @@
                     <div class="col-md-4">
                         <select name="status" class="form-select">
                             <option value="">All Statuses</option>
-                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                            <option value="pending"    {{ request('status') == 'pending'    ? 'selected' : '' }}>Pending</option>
                             <option value="processing" {{ request('status') == 'processing' ? 'selected' : '' }}>Processing</option>
-                            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
-                            <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                            <option value="shipped"    {{ request('status') == 'shipped'    ? 'selected' : '' }}>Shipped</option>
+                            <option value="delivered"  {{ request('status') == 'delivered'  ? 'selected' : '' }}>Delivered</option>
                         </select>
                     </div>
                     <div class="col-md-4">
@@ -75,28 +82,19 @@
                             </td>
                             <td><strong>₱{{ number_format($order->total_amount ?? 0, 2) }}</strong></td>
                             <td>
-
-                                @if($order->status == 'pending')
-                                <span class="badge bg-warning text-dark">
-                                    Pending
-                                </span>
-                                @elseif($order->status == 'processing')
-                                <span class="badge bg-primary">
-                                    Processing
-                                </span>
-                                @elseif($order->status == 'completed')
-                                <span class="badge bg-success">
-                                    Completed
-                                </span>
-                                @elseif($order->status == 'cancelled')
-                                <span class="badge bg-danger">
-                                    Cancelled
-                                </span>
-                                @else
-                                <span class="badge bg-secondary">
-                                    {{ ucfirst($order->status ?? 'Unknown') }}
-                                </span>
-                                @endif
+                                <form action="{{ route('admin.orders.update', $order->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('PUT')
+                                    <select name="status" class="form-select form-select-sm"
+                                        onchange="this.form.submit()"
+                                        style="min-width: 130px;"
+                                    >
+                                        <option value="pending"    {{ $order->status == 'pending'    ? 'selected' : '' }}>⏳ Pending</option>
+                                        <option value="processing" {{ $order->status == 'processing' ? 'selected' : '' }}>🔄 Processing</option>
+                                        <option value="shipped"    {{ $order->status == 'shipped'    ? 'selected' : '' }}>🚚 Shipped</option>
+                                        <option value="delivered"  {{ $order->status == 'delivered'  ? 'selected' : '' }}>✅ Delivered</option>
+                                    </select>
+                                </form>
                             </td>
                             <td>{{ $order->created_at->format('M d, Y H:i') ?? 'N/A' }}</td>
                             <td>

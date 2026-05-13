@@ -17,8 +17,19 @@ class PaymentController extends Controller
             $payments = Payment::with('order.user')
                 ->latest()
                 ->paginate(10);
+
+            $completedPayments = Payment::where('status', 'paid')->count();
+            $pendingPayments = Payment::where('status', 'pending')->count();
+            $failedPayments = Payment::where('status', 'failed')->count();
+            $totalRevenue = Payment::where('status', 'paid')->sum('amount');
             
-            return view('admin.payments.index', compact('payments'));
+            return view('admin.payments.index', compact(
+                'payments', 
+                'completedPayments', 
+                'pendingPayments', 
+                'failedPayments', 
+                'totalRevenue'
+            ));
         }
         
         // API response
@@ -54,6 +65,8 @@ class PaymentController extends Controller
         $request->validate([
             'order_id' => 'required|exists:orders,id',
             'payment_method' => 'required|string|in:Credit Card,PayPal,Cash on Delivery,GCash',
+            'reference_number' => 'required_unless:payment_method,Cash on Delivery|nullable|string|max:255',
+            'account_info' => 'required_unless:payment_method,Cash on Delivery|nullable|string|max:255',
         ]);
 
         $order = \App\Models\Order::where('user_id', \Illuminate\Support\Facades\Auth::id())
@@ -67,8 +80,10 @@ class PaymentController extends Controller
         $payment = Payment::create([
             'order_id' => $order->id,
             'amount' => $order->total_amount,
-            'status' => 'paid',
-            'payment_method' => $request->payment_method
+            'status' => ($request->payment_method === 'Cash on Delivery') ? 'pending' : 'paid',
+            'payment_method' => $request->payment_method,
+            'reference_number' => $request->reference_number,
+            'account_info' => $request->account_info,
         ]);
 
         // Update Order Status

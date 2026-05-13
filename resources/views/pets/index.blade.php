@@ -24,7 +24,7 @@
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="card shadow-sm border-0 h-100 pet-card">
                     @if($pet->image)
-                        <img src="{{ asset($pet->image) }}" class="card-img-top" alt="{{ $pet->name }}" style="height: 200px; object-fit: cover;">
+                        <img src="{{ $pet->image }}" class="card-img-top" alt="{{ $pet->name }}" style="height: 200px; object-fit: cover;">
                     @else
                         <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
                             <i class="fas fa-paw fa-3x text-muted"></i>
@@ -41,7 +41,7 @@
 
                         <p class="mb-1 text-muted small"><i class="fas fa-dna me-1"></i> <strong>Species:</strong> {{ $pet->species }}</p>
                         <p class="mb-1 text-muted small"><i class="fas fa-dog me-1"></i> <strong>Breed:</strong> {{ $pet->breed }}</p>
-                        <p class="mb-2 text-muted small"><i class="fas fa-birthday-cake me-1"></i> <strong>Age:</strong> {{ $pet->age }} yrs</p>
+                        <p class="mb-2 text-muted small"><i class="fas fa-birthday-cake me-1"></i> <strong>Age:</strong> {{ $pet->age }} {{ $pet->age_unit ?? 'yrs' }}</p>
                         
                         <h5 class="text-primary mt-3 fw-bold">₱{{ number_format($pet->price, 2) }}</h5>
                     </div>

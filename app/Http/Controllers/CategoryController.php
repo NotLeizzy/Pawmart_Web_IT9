@@ -9,7 +9,7 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        // Check if this is an admin request
+        // Admin recognition
         if (request()->is('admin/*')) {
             $categories = Category::withCount('products')
                 ->when(request('search'), function ($query) {
@@ -20,7 +20,6 @@ class CategoryController extends Controller
             return view('admin.categories.index', compact('categories'));
         }
 
-        // API response
         return Category::all();
     }
 

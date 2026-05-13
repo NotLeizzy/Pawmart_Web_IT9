@@ -75,17 +75,24 @@
                                     </small>
                                 </td>
                                 <td>
-                                    @if($petOrder->status == 'approved')
+                                    @php
+                                        $status = optional($petOrder->order)->status;
+                                    @endphp
+                                    @if($status == 'delivered')
                                         <span class="badge bg-success">
-                                            <i class="fas fa-check"></i> Approved
+                                            <i class="fas fa-check"></i> Delivered
                                         </span>
-                                    @elseif($petOrder->status == 'rejected')
-                                        <span class="badge bg-danger">
-                                            <i class="fas fa-times"></i> Rejected
-                                        </span>
-                                    @else
+                                    @elseif($status == 'pending')
                                         <span class="badge bg-warning text-dark">
                                             <i class="fas fa-clock"></i> Pending
+                                        </span>
+                                    @elseif($status == 'processing')
+                                        <span class="badge bg-primary">
+                                            <i class="fas fa-sync"></i> Processing
+                                        </span>
+                                    @else
+                                        <span class="badge bg-secondary">
+                                            {{ ucfirst($status ?? 'Unknown') }}
                                         </span>
                                     @endif
                                 </td>

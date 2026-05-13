@@ -64,7 +64,7 @@
                             <td>
                                 <div class="d-flex align-items-center">
                                     @if($pet->image)
-                                    <img src="{{ asset($pet->image) }}" class="rounded me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                    <img src="{{ $pet->image }}" class="rounded me-2" style="width: 40px; height: 40px; object-fit: cover;">
                                     @else
                                     <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
                                         <i class="fas fa-paw text-muted"></i>
@@ -75,7 +75,10 @@
                             </td>
                             <td>{{ $pet->breed ?? 'N/A' }}</td>
                             <td>{{ 'N/A' }}</td>
-                            <td>{{ $pet->age ?? 'N/A' }} years</td>
+                            <td>
+                                {{ $pet->age ?? 'N/A' }} 
+                                {{ $pet->age_unit ?? 'years' }}
+                            </td>
                             <td>
                                 @if($pet->status == 'available')
                                 <span class="badge bg-success">

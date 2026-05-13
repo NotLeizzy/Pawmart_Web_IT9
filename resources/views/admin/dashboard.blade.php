@@ -139,7 +139,7 @@
     </div>
 </div>
 
-<!-- Recent Activity Section -->
+<!-- Recent Orders Section -->
 <div class="row">
     <div class="col-lg-8 mb-4">
         <div class="card border-0 shadow-sm">
@@ -162,26 +162,26 @@
                     </thead>
                     <tbody>
                         @if(isset($recentOrders) && $recentOrders->count() > 0)
-                            @foreach($recentOrders as $order)
-                                <tr>
-                                    <td><strong>#{{ $order->id }}</strong></td>
-                                    <td>{{ $order->user->name ?? 'N/A' }}</td>
-                                    <td>₱{{ number_format($order->total ?? 0, 2) }}</td>
-                                    <td>
-                                        <span class="badge bg-warning text-dark">{{ ucfirst($order->status ?? 'pending') }}</span>
-                                    </td>
-                                    <td>{{ $order->created_at->format('M d, Y') ?? 'N/A' }}</td>
-                                    <td>
-                                        <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-sm btn-outline-primary">
-                                            View
-                                        </a>
-                                    </td>
-                                </tr>
-                            @endforeach
+                        @foreach($recentOrders as $order)
+                        <tr>
+                            <td><strong>#{{ $order->id }}</strong></td>
+                            <td>{{ $order->user->name ?? 'N/A' }}</td>
+                            <td>₱{{ number_format($order->total_amount ?? 0, 2) }}</td>
+                            <td>
+                                <span class="badge bg-warning text-dark">{{ ucfirst($order->status ?? 'pending') }}</span>
+                            </td>
+                            <td>{{ $order->created_at->format('M d, Y') ?? 'N/A' }}</td>
+                            <td>
+                                <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-sm btn-outline-primary">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                        @endforeach
                         @else
-                            <tr>
-                                <td colspan="6" class="text-center text-muted py-4">No orders yet</td>
-                            </tr>
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">No orders yet</td>
+                        </tr>
                         @endif
                     </tbody>
                 </table>

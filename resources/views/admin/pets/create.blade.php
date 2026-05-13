@@ -54,17 +54,29 @@
                             @enderror
                         </div>
                         <div class="col-md-6">
-                            <label for="age" class="form-label">Age</label>
-                            <input type="number" id="age" name="age" min="0"
-                                class="form-control @error('age') is-invalid @enderror"
-                                value="{{ old('age', $pet->age ?? '') }}">
+                            <label for="age" class="form-label">Age <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="number" id="age" name="age" min="0" required
+                                    class="form-control @error('age') is-invalid @enderror"
+                                    value="{{ old('age', $pet->age ?? '') }}">
+                                <select name="age_unit" class="form-select @error('age_unit') is-invalid @enderror" style="max-width: 130px;">
+                                    <option value="years" {{ old('age_unit', $pet->age_unit ?? '') === 'years' ? 'selected' : '' }}>Years old</option>
+                                    <option value="months" {{ old('age_unit', $pet->age_unit ?? '') === 'months' ? 'selected' : '' }}>Months old</option>
+                                </select>
+                            </div>
                             @error('age')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <small class="text-danger d-block mt-1">{{ $message }}</small>
                             @enderror
                         </div>
                     <div class="row g-3 mb-4">
                         <div class="col-md-12">
                             <label for="image" class="form-label">Pet Image</label>
+                            @if(isset($pet) && $pet->image)
+                                <div class="mb-2">
+                                    <img src="{{ $pet->image }}" alt="Pet Image" class="img-thumbnail" style="max-height: 150px;">
+                                    <p class="text-muted small">Current Image</p>
+                                </div>
+                            @endif
                             <input type="file" id="image" name="image" accept="image/*"
                                 class="form-control @error('image') is-invalid @enderror">
                             @error('image')

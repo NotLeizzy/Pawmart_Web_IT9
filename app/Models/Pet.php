@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Pet extends Model
 {
-    protected $fillable = ['name', 'species', 'breed', 'age', 'price', 'status'];
+    protected $fillable = ['name', 'species', 'breed', 'age', 'age_unit', 'price', 'status', 'image'];
 
     public function petOrders()
     {
