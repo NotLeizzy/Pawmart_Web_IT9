@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\BinarySearch;
+use App\Helpers\MergeSort;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
@@ -239,5 +241,28 @@ class ProductController extends Controller
             'message' => 'Product added to cart!',
             'cart_count' => array_sum(array_column($cart, 'quantity'))
         ]);
+    }
+
+    /**
+     * Sort a list of product names using the MergeSort helper.
+     *
+     * @param array<int, string> $productNames
+     * @return array<int, string>
+     */
+    protected function sortProductNames(array $productNames): array
+    {
+        return MergeSort::sort($productNames);
+    }
+
+    /**
+     * Search a sorted list of product names using the BinarySearch helper.
+     *
+     * @param array<int, string> $productNames
+     * @param string $target
+     * @return int|null
+     */
+    protected function searchProductName(array $productNames, string $target): ?int
+    {
+        return BinarySearch::search($productNames, $target);
     }
 }

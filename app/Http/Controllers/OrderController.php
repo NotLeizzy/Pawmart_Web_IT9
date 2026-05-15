@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\HeapQueue;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\PetOrder;
@@ -163,4 +164,33 @@ class OrderController extends Controller
         Order::destroy($id);
         return response()->json(['message' => 'Deleted']);
     }
+
+    /**
+     * Build a priority queue from orders for prioritized processing.
+     *
+     * @param array<int, \App\Models\Order> $orders
+     * @return HeapQueue
+     */
+    protected function buildOrderPriorityQueue(array $orders): HeapQueue
+    {
+        $queue = new HeapQueue();
+
+        foreach ($orders as $order) {
+            $queue->insert($order, $this->mapOrderStatusToPriority($order->status));
+        }
+
+        return $queue;
+    }
+
+    protected function mapOrderStatusToPriority(string $status): int
+    {
+        return match ($status) {
+            'pending' => 1,
+            'processing' => 2,
+            'shipped' => 3,
+            'delivered' => 4,
+            default => 5,
+        };
+    }
 }
+
