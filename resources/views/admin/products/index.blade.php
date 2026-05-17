@@ -6,8 +6,15 @@
 @section('content')
 <div class="row mb-4">
     <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center">
-            <h2>Products</h2>
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <h2 class="mb-0">Products</h2>
+                @if(isset($productSearchTime))
+                <span class="badge border-0" style="background: linear-gradient(135deg, #4fc3f7 0%, #0288d1 100%); color: white; font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 50px; box-shadow: 0 4px 6px rgba(2, 136, 209, 0.2);">
+                    <i class="fas fa-microchip me-1"></i> BST Search: {{ $productSearchTime }} ms
+                </span>
+                @endif
+            </div>
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productCreateModal">
                 <i class="fas fa-plus"></i> Add Product
             </button>

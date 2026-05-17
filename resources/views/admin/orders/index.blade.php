@@ -6,8 +6,13 @@
 @section('content')
 <div class="row mb-4">
     <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center">
-            <h2>Orders</h2>
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <h2 class="mb-0">Orders</h2>
+            @if(isset($orderHeapTime))
+            <span class="badge border-0" style="background: linear-gradient(135deg, #a55eea 0%, #8c44db 100%); color: white; font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 50px; box-shadow: 0 4px 6px rgba(165, 94, 234, 0.2);">
+                <i class="fas fa-microchip me-1"></i> Heap Scheduler: {{ $orderHeapTime }} ms
+            </span>
+            @endif
         </div>
     </div>
 </div>

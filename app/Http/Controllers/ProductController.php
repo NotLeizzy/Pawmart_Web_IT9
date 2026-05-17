@@ -20,7 +20,25 @@ class ProductController extends Controller
 
             $categories = Category::all();
 
-            return view('admin.products.index', compact('products', 'categories'));
+            // Timed BST Search
+            $searchQuery = request('search');
+            $productSearchTime = null;
+
+            if ($searchQuery) {
+                $bstStart = hrtime(true);
+                $allProductsForSearch = Product::all();
+                $productBst = new \App\Services\ProductBST();
+
+                foreach ($allProductsForSearch as $p) {
+                    $productBst->insert($p->name, $p);
+                }
+
+                $productBst->search($searchQuery);
+                $bstEnd = hrtime(true);
+                $productSearchTime = round(($bstEnd - $bstStart) / 1_000_000.0, 5); // ms
+            }
+
+            return view('admin.products.index', compact('products', 'categories', 'productSearchTime'));
         }
 
         if (request()->wantsJson()) {

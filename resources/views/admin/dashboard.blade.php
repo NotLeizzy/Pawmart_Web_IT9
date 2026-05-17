@@ -233,6 +233,63 @@
             </div>
         </div>
     </div>
-</div>
 
-@endsection
+    <!-- Performance Analytics & Empirical Evaluation Panel -->
+    <div class="row mt-4 mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm overflow-hidden" style="background: #1e1e2f; color: #ffffff; border-radius: 12px;">
+                <!-- Panel Header -->
+                <div class="card-header border-bottom border-secondary d-flex justify-content-between align-items-center" style="background: rgba(255, 255, 255, 0.05); padding: 18px 24px;">
+                    <h5 class="card-title mb-0" style="font-weight: 700; color: #4fc3f7; letter-spacing: 0.5px;">
+                        <i class="fas fa-microchip me-2"></i> EMPIRICAL PERFORMANCE ANALYTICS
+                    </h5>
+                    <span class="badge bg-info text-dark" style="font-size: 12px; font-weight: 600; padding: 6px 12px;">
+                        ⚡ Live Engine Active
+                    </span>
+                </div>
+
+                <!-- Body -->
+                <div class="card-body" style="padding: 24px;">
+                    <!-- Responsive Evaluation Table -->
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle text-center" style="border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; overflow: hidden;">
+                            <thead>
+                                <tr style="background: rgba(79, 195, 247, 0.1); border-bottom: 2px solid rgba(79, 195, 247, 0.3);">
+                                    <th style="color: #ffffff; font-weight: 600; padding: 14px;">Input Size (N)</th>
+                                    <th style="color: #4fc3f7; font-weight: 600; padding: 14px;">BST Search Time (ms)</th>
+                                    <th style="color: #a580ff; font-weight: 600; padding: 14px;">Priority Queue (Heap) (ms)</th>
+                                    <th style="color: #81c784; font-weight: 600; padding: 14px;">Merge Sort Time (ms)</th>
+                                    <th style="color: #ffb74d; font-weight: 600; padding: 14px;">Hash Table Lookup (ms)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($dsaTimings as $size => $times)
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;">
+                                    <td style="padding: 14px; font-weight: 700;">
+                                        <span class="badge" style="background: rgba(255,255,255,0.1); color: #ffffff; font-size: 13px; padding: 6px 12px; border-radius: 4px;">
+                                            {{ $size === 50 ? 'Small' : ($size === 100 ? 'Medium' : 'Large') }} (N = {{ $size }})
+                                        </span>
+                                    </td>
+                                    <td style="padding: 14px; color: #4fc3f7; font-family: monospace; font-size: 15px; font-weight: 600;">
+                                        {{ number_format($times['bst_time'], 4) }} ms
+                                    </td>
+                                    <td style="padding: 14px; color: #b39ddb; font-family: monospace; font-size: 15px; font-weight: 600;">
+                                        {{ number_format($times['heap_time'], 4) }} ms
+                                    </td>
+                                    <td style="padding: 14px; color: #a5d6a7; font-family: monospace; font-size: 15px; font-weight: 600;">
+                                        {{ number_format($times['sort_time'], 4) }} ms
+                                    </td>
+                                    <td style="padding: 14px; color: #ffe082; font-family: monospace; font-size: 15px; font-weight: 600;">
+                                        {{ number_format($times['hash_time'], 4) }} ms
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @endsection

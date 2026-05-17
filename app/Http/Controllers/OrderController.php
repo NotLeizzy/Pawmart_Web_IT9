@@ -41,7 +41,33 @@ class OrderController extends Controller
                 ->paginate(10)
                 ->withQueryString();
 
-            return view('admin.orders.index', compact('orders'));
+            // Timed Priority Queue Scheduling using Max-Heap
+            $heapStart = hrtime(true);
+            $allOrdersForScheduling = Order::all();
+            $orderHeap = new \App\Services\MaxHeap();
+            
+            foreach ($allOrdersForScheduling as $schedOrder) {
+                $statusVal = 0;
+                if ($schedOrder->status === 'pending') $statusVal = 300;
+                elseif ($schedOrder->status === 'processing') $statusVal = 200;
+                elseif ($schedOrder->status === 'shipped') $statusVal = 100;
+                
+                $valueVal = min(100, $schedOrder->total_amount / 100.0);
+                $priority = $statusVal + $valueVal;
+                
+                $orderHeap->insert($priority, $schedOrder);
+            }
+            
+            // Extract sorted queue
+            $sortedOrders = [];
+            while (!$orderHeap->isEmpty()) {
+                $sortedOrders[] = $orderHeap->extractMax();
+            }
+            
+            $heapEnd = hrtime(true);
+            $orderHeapTime = round(($heapEnd - $heapStart) / 1_000_000.0, 5); // milliseconds
+
+            return view('admin.orders.index', compact('orders', 'orderHeapTime'));
         }
 
         // CUSTOMER VIEW
