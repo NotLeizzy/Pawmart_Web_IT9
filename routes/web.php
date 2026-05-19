@@ -142,6 +142,9 @@ Route::middleware(['auth', 'verified', 'admin'])
             $totalPetOrders = \App\Models\PetOrder::count();
             $recentOrders = \App\Models\Order::with('user')->latest()->take(5)->get();
 
+            // Run Live DSA Performance Evaluation Engine
+            $dsaTimings = \App\Services\DsaBenchmarkService::runEvaluation();
+
             return view('admin.dashboard', compact(
                 'totalProducts',
                 'totalOrders',
@@ -150,7 +153,8 @@ Route::middleware(['auth', 'verified', 'admin'])
                 'totalCategories',
                 'totalPayments',
                 'totalPetOrders',
-                'recentOrders'
+                'recentOrders',
+                'dsaTimings'
             ));
         })->name('dashboard');
 

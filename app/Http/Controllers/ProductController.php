@@ -12,30 +12,46 @@ class ProductController extends Controller
     public function index()
     {
         if (request()->is('admin/*')) {
-            $products = Product::with('category')
-                ->when(request('search'), function ($query) {
-                    $query->where('name', 'like', '%' . request('search') . '%');
-                })
-                ->paginate(10);
-
             $categories = Category::all();
-
-            // Timed BST Search
             $searchQuery = request('search');
             $productSearchTime = null;
 
             if ($searchQuery) {
                 $bstStart = hrtime(true);
-                $allProductsForSearch = Product::all();
+                
+                // Fetch all products to construct BST in memory
+                $allProductsForSearch = Product::with('category')->get();
                 $productBst = new \App\Services\ProductBST();
 
                 foreach ($allProductsForSearch as $p) {
                     $productBst->insert($p->name, $p);
                 }
 
-                $productBst->search($searchQuery);
+                // Search using self-balancing AVL Tree search
+                $searchResults = $productBst->search($searchQuery);
+
+                // Sort results alphabetically using custom stable MergeSorter
+                $sortedResults = \App\Services\MergeSorter::sort($searchResults, 'name');
+
                 $bstEnd = hrtime(true);
                 $productSearchTime = round(($bstEnd - $bstStart) / 1_000_000.0, 5); // ms
+
+                // Custom LengthAwarePaginator wrapping to preserve pagination UI
+                $currentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
+                $perPage = 10;
+                $currentItems = array_slice($sortedResults, ($currentPage - 1) * $perPage, $perPage);
+                
+                $products = new \Illuminate\Pagination\LengthAwarePaginator(
+                    $currentItems,
+                    count($sortedResults),
+                    $perPage,
+                    $currentPage,
+                    ['path' => \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPath()]
+                );
+                
+                $products->appends(['search' => $searchQuery]);
+            } else {
+                $products = Product::with('category')->paginate(10);
             }
 
             return view('admin.products.index', compact('products', 'categories', 'productSearchTime'));

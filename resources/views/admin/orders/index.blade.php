@@ -8,9 +8,13 @@
     <div class="col-12">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
             <h2 class="mb-0">Orders</h2>
-            @if(isset($orderHeapTime))
+            @if(isset($orderHeapTime) && isset($scheduleMode) && $scheduleMode === 'priority')
             <span class="badge border-0" style="background: linear-gradient(135deg, #a55eea 0%, #8c44db 100%); color: white; font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 50px; box-shadow: 0 4px 6px rgba(165, 94, 234, 0.2);">
                 <i class="fas fa-microchip me-1"></i> Heap Scheduler: {{ $orderHeapTime }} ms
+            </span>
+            @else
+            <span class="badge border-0 bg-secondary" style="font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 50px;">
+                <i class="fas fa-history me-1"></i> FCFS Sequential Order
             </span>
             @endif
         </div>
@@ -30,10 +34,10 @@
         <div class="card border-0 shadow-sm">
             <div class="card-body">
                 <form method="GET" action="{{ route('admin.orders.index') }}" class="row g-3">
-                    <div class="col-md-4">
-                        <input type="text" name="search" class="form-control" placeholder="Search by order ID or customer..." value="{{ request('search') }}">
+                    <div class="col-md-3">
+                        <input type="text" name="search" class="form-control" placeholder="Search ID or customer..." value="{{ request('search') }}">
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <select name="status" class="form-select">
                             <option value="">All Statuses</option>
                             <option value="pending"    {{ request('status') == 'pending'    ? 'selected' : '' }}>Pending</option>
@@ -42,13 +46,19 @@
                             <option value="delivered"  {{ request('status') == 'delivered'  ? 'selected' : '' }}>Delivered</option>
                         </select>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
+                        <select name="schedule" class="form-select">
+                            <option value="priority" {{ (request('schedule', 'priority') == 'priority') ? 'selected' : '' }}>⚡ Heap Priority Queue</option>
+                            <option value="fcfs"     {{ (request('schedule') == 'fcfs') ? 'selected' : '' }}>⏳ FCFS (First-Come, First-Served)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary flex-grow-1">
-                                <i class="fas fa-search"></i> Filter
+                                <i class="fas fa-filter"></i> Apply
                             </button>
                             <a href="{{ route('admin.orders.index') }}" class="btn btn-secondary">
-                                <i class="fas fa-redo"></i>
+                                <i class="fas fa-redo"></i> Reset
                             </a>
                         </div>
                     </div>
