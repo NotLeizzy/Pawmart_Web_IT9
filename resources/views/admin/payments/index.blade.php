@@ -110,7 +110,7 @@
                                 <td><strong>₱{{ number_format($payment->amount ?? 0, 2) }}</strong></td>
                                 <td>
                                     <span class="badge bg-light text-dark">
-                                        {{ ucfirst($payment->method ?? 'unknown') }}
+                                        {{ ucfirst($payment->payment_method ?? 'unknown') }}
                                     </span>
                                 </td>
                                 <td>
