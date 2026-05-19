@@ -12,47 +12,42 @@ class ProductController extends Controller
     public function index()
     {
         if (request()->is('admin/*')) {
-            $categories = Category::all();
-            $searchQuery = request('search');
-            $productSearchTime = null;
+            $allProducts = Product::with(['category', 'images'])->get();
 
-            if ($searchQuery) {
-                $bstStart = hrtime(true);
-                
-                // Fetch all products to construct BST in memory
-                $allProductsForSearch = Product::with('category')->get();
-                $productBst = new \App\Services\ProductBST();
-
-                foreach ($allProductsForSearch as $p) {
-                    $productBst->insert($p->name, $p);
-                }
-
-                // Search using self-balancing AVL Tree search
-                $searchResults = $productBst->search($searchQuery);
-
-                // Sort results alphabetically using custom stable MergeSorter
-                $sortedResults = \App\Services\MergeSorter::sort($searchResults, 'name');
-
-                $bstEnd = hrtime(true);
-                $productSearchTime = round(($bstEnd - $bstStart) / 1_000_000.0, 5); // ms
-
-                // Custom LengthAwarePaginator wrapping to preserve pagination UI
-                $currentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
-                $perPage = 10;
-                $currentItems = array_slice($sortedResults, ($currentPage - 1) * $perPage, $perPage);
-                
-                $products = new \Illuminate\Pagination\LengthAwarePaginator(
-                    $currentItems,
-                    count($sortedResults),
-                    $perPage,
-                    $currentPage,
-                    ['path' => \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPath()]
-                );
-                
-                $products->appends(['search' => $searchQuery]);
-            } else {
-                $products = Product::with('category')->paginate(10);
+            // 1. Build AVL Tree
+            $productBst = new \App\Services\ProductBST();
+            foreach ($allProducts as $p) {
+                $productBst->insert($p->name, $p);
             }
+
+            // 2. Perform Search using our AVL Tree
+            $searchQuery = request('search');
+            $bstStart = hrtime(true);
+            $filteredProducts = $productBst->search($searchQuery);
+            $bstEnd = hrtime(true);
+            $productSearchTime = round(($bstEnd - $bstStart) / 1_000_000.0, 5); // ms
+
+            // 3. Sort products using MergeSorter
+            $sortBy = request('sort', 'name'); // default sorting by name
+            if ($sortBy === 'price') {
+                $filteredProducts = \App\Services\MergeSorter::sort($filteredProducts, 'price');
+            } elseif ($sortBy === 'name') {
+                $filteredProducts = \App\Services\MergeSorter::sort($filteredProducts, 'name');
+            }
+
+            // 4. Manually paginate the array so Blade pagination doesn't break
+            $currentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
+            $perPage = 10;
+            $currentItems = array_slice($filteredProducts, ($currentPage - 1) * $perPage, $perPage);
+            $products = new \Illuminate\Pagination\LengthAwarePaginator(
+                $currentItems,
+                count($filteredProducts),
+                $perPage,
+                $currentPage,
+                ['path' => \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPath(), 'query' => request()->query()]
+            );
+
+            $categories = Category::all();
 
             return view('admin.products.index', compact('products', 'categories', 'productSearchTime'));
         }
@@ -153,12 +148,22 @@ class ProductController extends Controller
 
     public function show($id)
     {
+        $allProducts = Product::with(['category', 'images'])->get();
+        $hashTable = new \App\Services\CustomHashTable(count($allProducts) * 2 + 1);
+        foreach ($allProducts as $p) {
+            $hashTable->insert($p->id, $p);
+        }
+
+        $product = $hashTable->search($id);
+
+        if (!$product) {
+            abort(404);
+        }
+
         if (request()->is('admin/*')) {
-            $product = Product::with(['category', 'images'])->findOrFail($id);
             return redirect()->route('admin.products.index');
         }
 
-        $product = Product::with(['category', 'images'])->findOrFail($id);
         return view('products.show', compact('product'));
     }
 
@@ -238,7 +243,19 @@ class ProductController extends Controller
             'quantity' => 'required|integer|min:1',
         ]);
 
-        $product = Product::findOrFail($validated['product_id']);
+        $allProducts = Product::all();
+        $hashTable = new \App\Services\CustomHashTable(count($allProducts) * 2 + 1);
+        foreach ($allProducts as $p) {
+            $hashTable->insert($p->id, $p);
+        }
+
+        $product = $hashTable->search($validated['product_id']);
+
+        if (!$product) {
+            return response()->json([
+                'message' => 'Product not found.'
+            ], 404);
+        }
 
         if ($validated['quantity'] > $product->stock) {
             return response()->json([

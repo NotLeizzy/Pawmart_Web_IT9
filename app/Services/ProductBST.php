@@ -6,17 +6,14 @@ class BSTNode
 {
     public $key;   // Product Name
     public $data;  // Product Details/Model
-    public $left;
-    public $right;
-    public $height;
+    public $left = null;
+    public $right = null;
+    public $height = 1;
 
     public function __construct($key, $data)
     {
         $this->key = $key;
         $this->data = $data;
-        $this->left = null;
-        $this->right = null;
-        $this->height = 1;
     }
 }
 
@@ -24,14 +21,14 @@ class ProductBST
 {
     private $root = null;
 
-    private function getHeight($node)
+    private function height($node)
     {
         return $node === null ? 0 : $node->height;
     }
 
     private function getBalance($node)
     {
-        return $node === null ? 0 : $this->getHeight($node->left) - $this->getHeight($node->right);
+        return $node === null ? 0 : $this->height($node->left) - $this->height($node->right);
     }
 
     private function rotateRight($y)
@@ -44,8 +41,8 @@ class ProductBST
         $y->left = $T2;
 
         // Update heights
-        $y->height = max($this->getHeight($y->left), $this->getHeight($y->right)) + 1;
-        $x->height = max($this->getHeight($x->left), $this->getHeight($x->right)) + 1;
+        $y->height = max($this->height($y->left), $this->height($y->right)) + 1;
+        $x->height = max($this->height($x->left), $this->height($x->right)) + 1;
 
         return $x;
     }
@@ -60,8 +57,8 @@ class ProductBST
         $x->right = $T2;
 
         // Update heights
-        $x->height = max($this->getHeight($x->left), $this->getHeight($x->right)) + 1;
-        $y->height = max($this->getHeight($y->left), $this->getHeight($y->right)) + 1;
+        $x->height = max($this->height($x->left), $this->height($x->right)) + 1;
+        $y->height = max($this->height($y->left), $this->height($y->right)) + 1;
 
         return $y;
     }
@@ -83,17 +80,17 @@ class ProductBST
         if ($compare < 0) {
             $node->left = $this->insertRec($node->left, $key, $data);
         } else {
-            // Equal keys go to right subtree to allow duplicate product names
+            // Allow duplicate keys by inserting to right subtree
             $node->right = $this->insertRec($node->right, $key, $data);
         }
 
         // 2. Update height of this ancestor node
-        $node->height = 1 + max($this->getHeight($node->left), $this->getHeight($node->right));
+        $node->height = 1 + max($this->height($node->left), $this->height($node->right));
 
-        // 3. Get the balance factor of this node
+        // 3. Get the balance factor to check if it became unbalanced
         $balance = $this->getBalance($node);
 
-        // If this node becomes unbalanced, then check the 4 cases
+        // If node becomes unbalanced, perform AVL rotations:
 
         // Left Left Case
         if ($balance > 1 && strcasecmp($key, $node->left->key) < 0) {
@@ -120,6 +117,12 @@ class ProductBST
         return $node;
     }
 
+    /**
+     * Search products by name (case-insensitive substring match)
+     *
+     * @param string $key
+     * @return array
+     */
     public function search($key)
     {
         $results = [];
@@ -133,38 +136,42 @@ class ProductBST
             return;
         }
 
-        // Substring / partial match case-insensitively
+        // If search term is empty, return all products in-order
+        if (empty($key)) {
+            $this->searchRec($node->left, $key, $results);
+            $results[] = $node->data;
+            $this->searchRec($node->right, $key, $results);
+            return;
+        }
+
+        // Perform case-insensitive substring search
         if (stripos($node->key, $key) !== false) {
             $results[] = $node->data;
         }
 
-        // Check both subtrees for partial matches
+        // Continue searching both subtrees for substring matches
         $this->searchRec($node->left, $key, $results);
         $this->searchRec($node->right, $key, $results);
     }
 
-    // Exact search in O(log N) for clean Big-O lookup time benchmarks
-    public function searchExact($key)
+    /**
+     * In-order traversal helper to get all products sorted alphabetically
+     *
+     * @return array
+     */
+    public function getInOrder()
     {
-        return $this->searchExactRec($this->root, $key);
+        $results = [];
+        $this->inOrderRec($this->root, $results);
+        return $results;
     }
 
-    private function searchExactRec($node, $key)
+    private function inOrderRec($node, &$results)
     {
-        if ($node === null) {
-            return null;
+        if ($node !== null) {
+            $this->inOrderRec($node->left, $results);
+            $results[] = $node->data;
+            $this->inOrderRec($node->right, $results);
         }
-
-        $compare = strcasecmp($key, $node->key);
-
-        if ($compare === 0) {
-            return $node->data;
-        }
-
-        if ($compare < 0) {
-            return $this->searchExactRec($node->left, $key);
-        }
-
-        return $this->searchExactRec($node->right, $key);
     }
 }

@@ -241,218 +241,55 @@
                 <!-- Panel Header -->
                 <div class="card-header border-bottom border-secondary d-flex justify-content-between align-items-center" style="background: rgba(255, 255, 255, 0.05); padding: 18px 24px;">
                     <h5 class="card-title mb-0" style="font-weight: 700; color: #4fc3f7; letter-spacing: 0.5px;">
-                        <i class="fas fa-microchip me-2"></i> EMPIRICAL PERFORMANCE ANALYTICS & BENCHMARKS
+                        <i class="fas fa-microchip me-2"></i> EMPIRICAL PERFORMANCE ANALYTICS
                     </h5>
                     <span class="badge bg-info text-dark" style="font-size: 12px; font-weight: 600; padding: 6px 12px;">
-                        ⚡ Live Engine Active (N=100, 500, 1000)
+                        ⚡ Live Engine Active
                     </span>
                 </div>
 
                 <!-- Body -->
                 <div class="card-body" style="padding: 24px;">
-                    <!-- Navigation Tabs -->
-                    <ul class="nav nav-tabs border-secondary mb-4" id="dsaTab" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active text-white border-0 bg-transparent" id="general-tab" data-bs-toggle="tab" data-bs-target="#general-pane" type="button" role="tab" style="font-weight: 600; border-bottom: 3px solid #4fc3f7 !important;">
-                                <i class="fas fa-chart-bar me-1"></i> General Summary
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link text-muted border-0 bg-transparent" id="search-tab" data-bs-toggle="tab" data-bs-target="#search-pane" type="button" role="tab" style="font-weight: 600;">
-                                <i class="fas fa-search me-1"></i> Product Search
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link text-muted border-0 bg-transparent" id="sort-tab" data-bs-toggle="tab" data-bs-target="#sort-pane" type="button" role="tab" style="font-weight: 600;">
-                                <i class="fas fa-sort me-1"></i> Product Sorting
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link text-muted border-0 bg-transparent" id="heap-tab" data-bs-toggle="tab" data-bs-target="#heap-pane" type="button" role="tab" style="font-weight: 600;">
-                                <i class="fas fa-layer-group me-1"></i> Order Prioritization
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link text-muted border-0 bg-transparent" id="hash-tab" data-bs-toggle="tab" data-bs-target="#hash-pane" type="button" role="tab" style="font-weight: 600;">
-                                <i class="fas fa-hashtag me-1"></i> ID Lookup
-                            </button>
-                        </li>
-                    </ul>
-
-                    <!-- Tab Contents -->
-                    <div class="tab-content text-white" id="dsaTabContent">
-                        
-                        <!-- General Summary Pane -->
-                        <div class="tab-pane fade show active" id="general-pane" role="tabpanel" aria-labelledby="general-tab">
-                            <div class="table-responsive">
-                                <table class="table table-dark table-hover mb-0 align-middle text-center" style="border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; overflow: hidden;">
-                                    <thead>
-                                        <tr style="background: rgba(79, 195, 247, 0.1); border-bottom: 2px solid rgba(79, 195, 247, 0.3);">
-                                            <th style="color: #ffffff; padding: 14px;">Input Size (N)</th>
-                                            <th style="color: #ff6b6b; padding: 14px;">Baseline Time (ms)</th>
-                                            <th style="color: #81c784; padding: 14px;">Optimized Time (ms)</th>
-                                            <th style="color: #ffb74d; padding: 14px;">Improvement (%)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($dsaTimings as $size => $times)
-                                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                            <td style="padding: 14px; font-weight: 700;">
-                                                <span class="badge" style="background: rgba(255,255,255,0.1); color: #ffffff; font-size: 13px; padding: 6px 12px; border-radius: 4px;">
-                                                    N = {{ $size }}
-                                                </span>
-                                            </td>
-                                            <td style="padding: 14px; color: #ff6b6b; font-family: monospace; font-size: 15px; font-weight: 600;">
-                                                {{ number_format($times['general_baseline'], 2) }} ms
-                                            </td>
-                                            <td style="padding: 14px; color: #81c784; font-family: monospace; font-size: 15px; font-weight: 600;">
-                                                {{ number_format($times['general_optimized'], 2) }} ms
-                                            </td>
-                                            <td style="padding: 14px; color: #ffb74d; font-family: monospace; font-size: 15px; font-weight: 700;">
-                                                <span class="badge bg-success" style="padding: 6px 12px;">
-                                                    <i class="fas fa-arrow-up"></i> {{ $times['general_improvement'] }}%
-                                                </span>
-                                            </td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Product Search Pane -->
-                        <div class="tab-pane fade" id="search-pane" role="tabpanel" aria-labelledby="search-tab">
-                            <div class="table-responsive">
-                                <table class="table table-dark table-hover mb-0 align-middle text-center" style="border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;">
-                                    <thead>
-                                        <tr style="background: rgba(79, 195, 247, 0.1);">
-                                            <th style="padding: 14px;">Input Size (N)</th>
-                                            <th style="color: #ff6b6b; padding: 14px;">Baseline (SQL Scan)</th>
-                                            <th style="color: #4fc3f7; padding: 14px;">Optimized (BST Search)</th>
-                                            <th style="color: #81c784; padding: 14px;">Speedup Factor</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($dsaTimings as $size => $times)
-                                        <tr>
-                                            <td style="padding: 14px; font-weight: 700;">N = {{ $size }}</td>
-                                            <td style="padding: 14px; color: #ff6b6b; font-family: monospace;">{{ number_format($times['search_baseline'], 6) }} ms</td>
-                                            <td style="padding: 14px; color: #4fc3f7; font-family: monospace;">{{ number_format($times['search_optimized'], 6) }} ms</td>
-                                            <td style="padding: 14px; color: #81c784; font-weight: 700;">~{{ number_format($times['search_speedup']) }}x faster</td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Sorting Pane -->
-                        <div class="tab-pane fade" id="sort-pane" role="tabpanel" aria-labelledby="sort-tab">
-                            <div class="table-responsive">
-                                <table class="table table-dark table-hover mb-0 align-middle text-center" style="border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;">
-                                    <thead>
-                                        <tr style="background: rgba(79, 195, 247, 0.1);">
-                                            <th style="padding: 14px;">Input Size (N)</th>
-                                            <th style="color: #ff6b6b; padding: 14px;">Baseline (Selection Sort)</th>
-                                            <th style="color: #a5d6a7; padding: 14px;">Optimized (Merge Sort)</th>
-                                            <th style="color: #81c784; padding: 14px;">Speedup Factor</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($dsaTimings as $size => $times)
-                                        <tr>
-                                            <td style="padding: 14px; font-weight: 700;">N = {{ $size }}</td>
-                                            <td style="padding: 14px; color: #ff6b6b; font-family: monospace;">{{ number_format($times['sort_baseline'], 4) }} ms</td>
-                                            <td style="padding: 14px; color: #a5d6a7; font-family: monospace;">{{ number_format($times['sort_optimized'], 4) }} ms</td>
-                                            <td style="padding: 14px; color: #81c784; font-weight: 700;">~{{ number_format($times['sort_speedup'], 1) }}x faster</td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- Heap Order Prioritization Pane -->
-                        <div class="tab-pane fade" id="heap-pane" role="tabpanel" aria-labelledby="heap-tab">
-                            <div class="table-responsive">
-                                <table class="table table-dark table-hover mb-0 align-middle text-center" style="border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;">
-                                    <thead>
-                                        <tr style="background: rgba(79, 195, 247, 0.1);">
-                                            <th style="padding: 14px;">Input Size (N)</th>
-                                            <th style="color: #ff6b6b; padding: 14px;">Baseline (FCFS scan)</th>
-                                            <th style="color: #b39ddb; padding: 14px;">Optimized (Heap Scheduler)</th>
-                                            <th style="color: #81c784; padding: 14px;">Speedup Factor</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($dsaTimings as $size => $times)
-                                        <tr>
-                                            <td style="padding: 14px; font-weight: 700;">N = {{ $size }}</td>
-                                            <td style="padding: 14px; color: #ff6b6b; font-family: monospace;">{{ number_format($times['priority_baseline'], 4) }} ms</td>
-                                            <td style="padding: 14px; color: #b39ddb; font-family: monospace;">{{ number_format($times['priority_optimized'], 4) }} ms</td>
-                                            <td style="padding: 14px; color: #81c784; font-weight: 700;">~{{ number_format($times['priority_speedup'], 1) }}x faster</td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- ID Lookup Pane -->
-                        <div class="tab-pane fade" id="hash-pane" role="tabpanel" aria-labelledby="hash-tab">
-                            <div class="table-responsive">
-                                <table class="table table-dark table-hover mb-0 align-middle text-center" style="border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;">
-                                    <thead>
-                                        <tr style="background: rgba(79, 195, 247, 0.1);">
-                                            <th style="padding: 14px;">Input Size (N)</th>
-                                            <th style="color: #ff6b6b; padding: 14px;">Baseline (Sequential ID scan)</th>
-                                            <th style="color: #ffe082; padding: 14px;">Optimized (Hash Table)</th>
-                                            <th style="color: #81c784; padding: 14px;">Speedup Factor</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($dsaTimings as $size => $times)
-                                        <tr>
-                                            <td style="padding: 14px; font-weight: 700;">N = {{ $size }}</td>
-                                            <td style="padding: 14px; color: #ff6b6b; font-family: monospace;">{{ number_format($times['lookup_baseline'], 6) }} ms</td>
-                                            <td style="padding: 14px; color: #ffe082; font-family: monospace;">{{ number_format($times['lookup_optimized'], 6) }} ms</td>
-                                            <td style="padding: 14px; color: #81c784; font-weight: 700;">~{{ number_format($times['lookup_speedup']) }}x faster</td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
+                    <!-- Responsive Evaluation Table -->
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle text-center" style="border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; overflow: hidden;">
+                            <thead>
+                                <tr style="background: rgba(79, 195, 247, 0.1); border-bottom: 2px solid rgba(79, 195, 247, 0.3);">
+                                    <th style="color: #ffffff; font-weight: 600; padding: 14px;">Input Size (N)</th>
+                                    <th style="color: #4fc3f7; font-weight: 600; padding: 14px;">BST Search Time (ms)</th>
+                                    <th style="color: #a580ff; font-weight: 600; padding: 14px;">Priority Queue (Heap) (ms)</th>
+                                    <th style="color: #81c784; font-weight: 600; padding: 14px;">Merge Sort Time (ms)</th>
+                                    <th style="color: #ffb74d; font-weight: 600; padding: 14px;">Hash Table Lookup (ms)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($dsaTimings as $size => $times)
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;">
+                                    <td style="padding: 14px; font-weight: 700;">
+                                        <span class="badge" style="background: rgba(255,255,255,0.1); color: #ffffff; font-size: 13px; padding: 6px 12px; border-radius: 4px;">
+                                            {{ $size === 50 ? 'Small' : ($size === 100 ? 'Medium' : 'Large') }} (N = {{ $size }})
+                                        </span>
+                                    </td>
+                                    <td style="padding: 14px; color: #4fc3f7; font-family: monospace; font-size: 15px; font-weight: 600;">
+                                        {{ number_format($times['bst_time'], 6) }} ms
+                                    </td>
+                                    <td style="padding: 14px; color: #b39ddb; font-family: monospace; font-size: 15px; font-weight: 600;">
+                                        {{ number_format($times['heap_time'], 6) }} ms
+                                    </td>
+                                    <td style="padding: 14px; color: #a5d6a7; font-family: monospace; font-size: 15px; font-weight: 600;">
+                                        {{ number_format($times['sort_time'], 6) }} ms
+                                    </td>
+                                    <td style="padding: 14px; color: #ffe082; font-family: monospace; font-size: 15px; font-weight: 600;">
+                                        {{ number_format($times['hash_time'], 6) }} ms
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    @push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Interactive Tab Highlighting
-            const triggerTabList = document.querySelectorAll('#dsaTab button');
-            triggerTabList.forEach(triggerEl => {
-                triggerEl.addEventListener('click', event => {
-                    event.preventDefault();
-                    
-                    // Reset styling on all tab links
-                    triggerTabList.forEach(btn => {
-                        btn.classList.add('text-muted');
-                        btn.classList.remove('text-white');
-                        btn.style.borderBottom = 'none';
-                    });
-                    
-                    // Set active style on current link
-                    triggerEl.classList.remove('text-muted');
-                    triggerEl.classList.add('text-white');
-                    triggerEl.style.borderBottom = '3px solid #4fc3f7';
-                });
-            });
-        });
-    </script>
-    @endpush
     @endsection

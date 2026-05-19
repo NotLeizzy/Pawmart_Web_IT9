@@ -8,13 +8,9 @@
     <div class="col-12">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
             <h2 class="mb-0">Orders</h2>
-            @if(isset($orderHeapTime) && isset($scheduleMode) && $scheduleMode === 'priority')
+            @if(isset($orderHeapTime))
             <span class="badge border-0" style="background: linear-gradient(135deg, #a55eea 0%, #8c44db 100%); color: white; font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 50px; box-shadow: 0 4px 6px rgba(165, 94, 234, 0.2);">
                 <i class="fas fa-microchip me-1"></i> Heap Scheduler: {{ $orderHeapTime }} ms
-            </span>
-            @else
-            <span class="badge border-0 bg-secondary" style="font-size: 13px; font-weight: 600; padding: 8px 16px; border-radius: 50px;">
-                <i class="fas fa-history me-1"></i> FCFS Sequential Order
             </span>
             @endif
         </div>
@@ -35,7 +31,7 @@
             <div class="card-body">
                 <form method="GET" action="{{ route('admin.orders.index') }}" class="row g-3">
                     <div class="col-md-3">
-                        <input type="text" name="search" class="form-control" placeholder="Search ID or customer..." value="{{ request('search') }}">
+                        <input type="text" name="search" class="form-control" placeholder="Search by order ID or customer..." value="{{ request('search') }}">
                     </div>
                     <div class="col-md-3">
                         <select name="status" class="form-select">
@@ -47,9 +43,9 @@
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <select name="schedule" class="form-select">
-                            <option value="priority" {{ (request('schedule', 'priority') == 'priority') ? 'selected' : '' }}>⚡ Heap Priority Queue</option>
-                            <option value="fcfs"     {{ (request('schedule') == 'fcfs') ? 'selected' : '' }}>⏳ FCFS (First-Come, First-Served)</option>
+                        <select name="sort" class="form-select">
+                            <option value="">Default (Latest)</option>
+                            <option value="priority_queue" {{ request('sort') == 'priority_queue' ? 'selected' : '' }}>Priority Queue (Max-Heap)</option>
                         </select>
                     </div>
                     <div class="col-md-3">

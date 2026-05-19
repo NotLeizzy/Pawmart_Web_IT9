@@ -17,71 +17,65 @@ class OrderController extends Controller
     {
         // ADMIN VIEW
         if ($request->is('admin/*')) {
-            $searchQuery = $request->search;
-            $statusFilter = $request->status;
-            $scheduleMode = $request->get('schedule', 'priority'); // 'priority' or 'fcfs'
 
-            $ordersQuery = Order::with(['items.product', 'petOrders.pet', 'payment', 'user'])
-                ->when($searchQuery, function ($query) use ($searchQuery) {
-                    $query->where(function ($q) use ($searchQuery) {
-                        $q->where('id', $searchQuery)
-                            ->orWhereHas('user', function ($userQuery) use ($searchQuery) {
-                                $userQuery->where('name', 'LIKE', "%{$searchQuery}%");
+            $query = Order::with(['items.product', 'petOrders.pet', 'payment', 'user'])
+                ->when($request->search, function ($query) use ($request) {
+                    $search = $request->search;
+                    $query->where(function ($q) use ($search) {
+                        $q->where('id', $search)
+                            ->orWhereHas('user', function ($userQuery) use ($search) {
+                                $userQuery->where('name', 'LIKE', "%{$search}%");
                             });
                     });
                 })
-                ->when($statusFilter, function ($query) use ($statusFilter) {
-                    $query->where('status', $statusFilter);
+                ->when($request->status, function ($query) use ($request) {
+                    $query->where('status', $request->status);
                 });
 
-            $orderHeapTime = null;
+            // Timed Priority Queue Scheduling using Max-Heap
+            $heapStart = hrtime(true);
+            $allOrdersForScheduling = $query->get();
+            $orderHeap = new \App\Services\MaxHeap();
+            
+            foreach ($allOrdersForScheduling as $schedOrder) {
+                $statusVal = 0;
+                if ($schedOrder->status === 'pending') $statusVal = 300;
+                elseif ($schedOrder->status === 'processing') $statusVal = 200;
+                elseif ($schedOrder->status === 'shipped') $statusVal = 100;
+                
+                $valueVal = min(100, $schedOrder->total_amount / 100.0);
+                $priority = $statusVal + $valueVal;
+                
+                $orderHeap->insert($priority, $schedOrder);
+            }
+            
+            // Extract sorted queue
+            $sortedOrders = [];
+            while (!$orderHeap->isEmpty()) {
+                $sortedOrders[] = $orderHeap->extractMax();
+            }
+            
+            $heapEnd = hrtime(true);
+            $orderHeapTime = round(($heapEnd - $heapStart) / 1_000_000.0, 5); // milliseconds
 
-            if ($scheduleMode === 'priority') {
-                $heapStart = hrtime(true);
-                $allOrdersForScheduling = $ordersQuery->get();
-                $orderHeap = new \App\Services\MaxHeap();
-                
-                foreach ($allOrdersForScheduling as $schedOrder) {
-                    $statusVal = 0;
-                    if ($schedOrder->status === 'pending') $statusVal = 300;
-                    elseif ($schedOrder->status === 'processing') $statusVal = 200;
-                    elseif ($schedOrder->status === 'shipped') $statusVal = 100;
-                    
-                    $valueVal = min(100, $schedOrder->total_amount / 100.0);
-                    $priority = $statusVal + $valueVal;
-                    
-                    $orderHeap->insert($priority, $schedOrder);
-                }
-                
-                // Extract sorted queue
-                $sortedOrders = [];
-                while (!$orderHeap->isEmpty()) {
-                    $sortedOrders[] = $orderHeap->extractMax();
-                }
-                
-                $heapEnd = hrtime(true);
-                $orderHeapTime = round(($heapEnd - $heapStart) / 1_000_000.0, 5); // milliseconds
-
-                // Custom LengthAwarePaginator wrapping to preserve pagination UI
+            if ($request->sort === 'priority_queue') {
                 $currentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
                 $perPage = 10;
                 $currentItems = array_slice($sortedOrders, ($currentPage - 1) * $perPage, $perPage);
-                
                 $orders = new \Illuminate\Pagination\LengthAwarePaginator(
                     $currentItems,
                     count($sortedOrders),
                     $perPage,
                     $currentPage,
-                    ['path' => \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPath()]
+                    ['path' => \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPath(), 'query' => $request->query()]
                 );
-                
-                $orders->appends($request->all());
             } else {
-                // FCFS: ordered by created_at ascending (First Come First Served)
-                $orders = $ordersQuery->orderBy('created_at', 'asc')->paginate(10)->withQueryString();
+                $orders = $query->latest()
+                    ->paginate(10)
+                    ->withQueryString();
             }
 
-            return view('admin.orders.index', compact('orders', 'orderHeapTime', 'scheduleMode'));
+            return view('admin.orders.index', compact('orders', 'orderHeapTime'));
         }
 
         // CUSTOMER VIEW

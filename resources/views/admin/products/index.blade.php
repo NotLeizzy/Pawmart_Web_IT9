@@ -56,9 +56,9 @@
                     <thead class="table-light">
                         <tr>
                             <th>ID</th>
-                            <th>Product Name</th>
+                            <th><a href="{{ request()->fullUrlWithQuery(['sort' => 'name']) }}" class="text-decoration-none text-dark">Product Name <i class="fas fa-sort-alpha-down ms-1"></i></a></th>
                             <th>Category</th>
-                            <th>Price</th>
+                            <th><a href="{{ request()->fullUrlWithQuery(['sort' => 'price']) }}" class="text-decoration-none text-dark">Price <i class="fas fa-sort-numeric-down ms-1"></i></a></th>
                             <th>Stock</th>
                             <th>Status</th>
                             <th>Actions</th>
